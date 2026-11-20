@@ -1,0 +1,78 @@
+{
+  "brand": "Sri Lakshmi Snacks",
+  "location": "Tiruchirappalli, Tamil Nadu",
+  "nav": {
+    "dashboard": "Dashboard",
+    "orders": "Orders",
+    "new_order": "Take Order",
+    "production": "Production",
+    "production_plan": "Batch Planning",
+    "stock": "Live Stock",
+    "invoices": "Invoices",
+    "payments": "Payments",
+    "reports": "Reports",
+    "sign_out": "Sign Out"
+  },
+  "salesman": {
+    "title": "Sales Order Entry",
+    "select_customer": "Select Customer / Store",
+    "add_products": "Add Products",
+    "voice_input": "Voice Order (Tamil / English)",
+    "listening": "Listening... Speak customer, product, and quantity",
+    "confirm_title": "Confirm Voice Order",
+    "submit_order": "Submit Order",
+    "my_orders": "My Submitted Orders",
+    "stock_shortage": "Stock Warning",
+    "packets": "packets",
+    "rate": "Rate"
+  },
+  "production": {
+    "title": "Production Execution",
+    "select_bom": "Select Product BOM",
+    "batches": "Batches to Produce",
+    "prefill_btn": "Load Standard BOM",
+    "actual_good_output": "Actual Good Output (Packets)",
+    "damaged_pouches": "Damaged Pouches",
+    "cartons_used": "Cartons Used",
+    "save_run": "Save & Post Run",
+    "planning_title": "Production Planning from Approved Orders",
+    "make_batches": "batches needed to fulfill demand",
+    "variance": "Variance",
+    "cost_per_pkt": "Cost / Packet"
+  },
+  "admin": {
+    "incoming_orders": "Incoming Orders",
+    "approve_order": "Approve Order",
+    "reject_order": "Reject",
+    "create_invoice": "Create GST Invoice",
+    "record_dispatch": "Dispatch Order",
+    "collect_payment": "Record Payment",
+    "view_pdf": "View PDF Invoice",
+    "share_whatsapp": "WhatsApp Share"
+  },
+  "accountant": {
+    "title": "Factory Audit & Registers",
+    "sales_register": "Sales Register",
+    "gst_summary": "GST Summary (GSTR-1 / 3B)",
+    "purchase_register": "Purchase Register",
+    "ageing_report": "Outstanding with Ageing",
+    "export_csv": "Export CSV",
+    "export_excel": "Export Excel"
+  },
+  "owner": {
+    "title": "Executive Overview",
+    "today_orders": "Today's Orders",
+    "live_stock": "Factory Stock",
+    "variance_alerts": "Production Alerts",
+    "receivables": "Outstanding Receivables"
+  },
+  "common": {
+    "search": "Search...",
+    "quantity": "Quantity",
+    "amount": "Amount",
+    "date": "Date",
+    "status": "Status",
+    "actions": "Actions",
+    "offline_notice": "Offline mode active. Orders will sync automatically when network returns."
+  }
+}

@@ -17,6 +17,7 @@ from app.services.production_service import (
     execute_production_run,
     add_overheads_to_run
 )
+from app.services.planning_service import get_production_plan_from_pending_orders
 
 router = APIRouter(prefix="/production", tags=["Production & Manufacturing"])
 
@@ -87,6 +88,17 @@ def add_run_overheads(
         return run
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/plan-from-orders")
+def production_plan_from_orders(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles([UserRole.PRODUCTION, UserRole.ADMIN, UserRole.OWNER]))
+):
+    """
+    FEATURE: Production planning from pending orders:
+    'To fulfil approved orders, make N batches'.
+    """
+    return get_production_plan_from_pending_orders(db)
 
 @router.get("/runs", response_model=List[ProductionRunResponse])
 def list_production_runs(
