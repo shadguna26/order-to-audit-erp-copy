@@ -6,6 +6,10 @@ from app.api.v1.auth import router as auth_router
 from app.api.v1.stock import router as stock_router
 from app.api.v1.purchases import router as purchases_router
 from app.api.v1.production import router as production_router
+from app.api.v1.orders import router as orders_router
+from app.api.v1.invoices import router as invoices_router
+from app.api.v1.dispatches import router as dispatches_router
+from app.api.v1.payments import router as payments_router
 
 # Create all database tables on startup (or via Alembic in production)
 Base.metadata.create_all(bind=engine)
@@ -29,6 +33,10 @@ app.include_router(auth_router, prefix="/api/v1")
 app.include_router(stock_router, prefix="/api/v1")
 app.include_router(purchases_router, prefix="/api/v1")
 app.include_router(production_router, prefix="/api/v1")
+app.include_router(orders_router, prefix="/api/v1")
+app.include_router(invoices_router, prefix="/api/v1")
+app.include_router(dispatches_router, prefix="/api/v1")
+app.include_router(payments_router, prefix="/api/v1")
 
 @app.get("/health", tags=["Health"])
 def health_check():
