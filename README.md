@@ -52,41 +52,43 @@ The system strictly enforces the following rules across database constraints, se
 
 ## 3. Quickstart & Deployment
 
-### Option A: Docker Compose (Recommended)
+### Option A: Local Development (No Docker Required - Instant Run)
 
-To run the entire system (PostgreSQL 16, FastAPI backend, automated seed script, and React PWA frontend):
+Because Docker is not installed on all development machines, the system comes with an integrated SQLite database fallback and virtual environment.
+
+#### Quick Launcher (Starts both backend and frontend):
+```powershell
+.\start_servers.ps1
+```
+
+Or run manually in two terminal tabs:
+
+**Terminal 1 (Backend - FastAPI)**:
+```powershell
+$env:PYTHONPATH='backend'
+.\backend\.venv\Scripts\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+**Terminal 2 (Frontend - React + Vite PWA)**:
+```powershell
+cd frontend
+npm run dev
+```
+Open **[http://localhost:5173](http://localhost:5173)** in your browser!
+
+- **Frontend ERP Web App**: [http://localhost:5173](http://localhost:5173)
+- **Backend Swagger API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Health Check Endpoint**: [http://localhost:8000/health](http://localhost:8000/health)
+
+### Option B: Docker Compose (When Docker is installed)
+
+To run in isolated production containers with PostgreSQL 16:
 
 ```bash
 docker compose up --build
 ```
-
-- **Frontend ERP Web App**: [http://localhost:3000](http://localhost:3000)
-- **Backend Swagger API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
-- **Health Check Endpoint**: [http://localhost:8000/health](http://localhost:8000/health)
-
-### Option B: Local Development Setup
-
-#### 1. Backend Setup
-```powershell
-cd backend
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-
-# Run migrations and seed data
-python -m app.seeds.seed
-
-# Start FastAPI server on port 8000
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-#### 2. Frontend Setup
-```powershell
-cd frontend
-npm install
-npm run dev
-```
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+- **Frontend Container**: [http://localhost:3000](http://localhost:3000)
+- **Backend Container**: [http://localhost:8000](http://localhost:8000)
 
 #### 3. Running Automated Tests
 ```powershell
