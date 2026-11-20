@@ -72,8 +72,15 @@ export const App: React.FC = () => {
       {/* Top Application Header */}
       <header className="bg-white dark:bg-stone-900 border-b border-stone-300 dark:border-stone-800 px-4 sm:px-6 py-3 flex flex-wrap justify-between items-center gap-3 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded bg-turmeric-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-            SL
+          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-turmeric-500 shadow-sm shrink-0 bg-stone-900">
+            <img
+              src="/images/snacks_showcase.jpg"
+              alt="Sri Lakshmi Snacks"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
           </div>
           <div>
             <div className="flex items-center gap-2">

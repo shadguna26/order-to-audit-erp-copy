@@ -25,6 +25,18 @@ class UserCreate(BaseModel):
     role: UserRole
     phone: Optional[str] = None
 
+class UserRegister(BaseModel):
+    username: str
+    password: str
+    full_name: str
+    role: UserRole = UserRole.SALESMAN
+    phone: Optional[str] = None
+
+class ForgotPasswordRequest(BaseModel):
+    username: str
+    new_password: str
+    phone: Optional[str] = None
+
 class UserResponse(BaseModel):
     id: int
     username: str

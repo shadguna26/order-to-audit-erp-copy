@@ -152,6 +152,28 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
 
   return (
     <div className="max-w-2xl mx-auto space-y-5 pb-10">
+      {/* Authentic Market Showcase Banner */}
+      <div className="relative overflow-hidden rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-900 text-white shadow-sm">
+        <img
+          src="/images/snacks_showcase.jpg"
+          alt="Sri Lakshmi Snacks Traditional Display"
+          className="w-full h-36 sm:h-44 object-cover object-center opacity-65"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-4 sm:p-5">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] bg-turmeric-600 text-white font-bold px-2 py-0.5 rounded uppercase">
+              Tiruchirappalli Fresh
+            </span>
+            <span className="text-xs text-amber-200 font-bold">
+              Kai Murukku • Mixture • Thattai
+            </span>
+          </div>
+          <p className="text-[11px] text-stone-300">
+            Direct factory dispatch to retail stores across Tamil Nadu & South India
+          </p>
+        </div>
+      </div>
+
       {offlineCount > 0 && (
         <div className="p-3 bg-amber-500 text-white font-medium text-xs rounded flex justify-between items-center">
           <span>{offlineCount} order(s) buffered offline.</span>
@@ -209,10 +231,30 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
             <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
               {t('salesman.add_products')}
             </label>
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              {products.map((p) => {
+                const isSelected = selectedProductId === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setSelectedProductId(p.id)}
+                    className={`p-2.5 rounded-lg border text-left transition flex flex-col justify-between ${
+                      isSelected
+                        ? 'border-turmeric-600 bg-amber-50 dark:bg-amber-950/40 shadow-xs'
+                        : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 hover:border-turmeric-400'
+                    }`}
+                  >
+                    <span className="font-bold text-xs text-stone-900 dark:text-white">{p.name}</span>
+                    <span className="text-[11px] text-stone-500 font-mono mt-1">Stock: {p.balance_packets} pkts</span>
+                  </button>
+                );
+              })}
+            </div>
             <select
               value={selectedProductId}
               onChange={(e) => setSelectedProductId(Number(e.target.value))}
-              className="w-full min-h-[48px] px-3 bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded text-stone-900 dark:text-white text-sm"
+              className="w-full min-h-[44px] px-3 bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded text-stone-900 dark:text-white text-xs"
             >
               {products.map((p) => (
                 <option key={p.id} value={p.id}>

@@ -22,6 +22,31 @@ export const OwnerScreen: React.FC<{ token: string; user: any; onSelectStock: (t
 
   return (
     <div className="space-y-6">
+      {/* Authentic Market & Factory Status Banner */}
+      <div className="relative overflow-hidden rounded-xl border border-stone-300 dark:border-stone-800 bg-stone-900 text-white shadow-md">
+        <img
+          src="/images/market_hero.jpg"
+          alt="Sri Lakshmi Snacks Traditional Market Bazaar"
+          className="w-full h-40 sm:h-48 object-cover object-center opacity-45"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 to-transparent p-5 sm:p-6 flex flex-col justify-center">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-turmeric-600 text-white px-2 py-0.5 rounded shadow-xs">
+              Executive Factory Overview
+            </span>
+            <span className="text-xs text-amber-300 font-medium">
+              Tiruchirappalli Facility • Thuvakudi
+            </span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-white">
+            Sri Lakshmi Snacks • Operations & Audit
+          </h2>
+          <p className="text-xs text-stone-300 max-w-xl mt-1">
+            Real-time visibility into production batches, raw material weighted-average costing, GST outward supplies, and retail market receivables across Tamil Nadu.
+          </p>
+        </div>
+      </div>
+
       {/* Top 4 KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="p-4 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded shadow-sm">

@@ -114,3 +114,49 @@ def test_seed_opening_stock_ledger(db):
     ).first()
     assert murukku_entry is not None
     assert murukku_entry.qty_base == 50.0
+
+
+def test_register_new_member(client: TestClient):
+    """
+    Verify new staff member registration and duplicate username rejection.
+    """
+    payload = {
+        "username": "k_murugan",
+        "password": "secret123password",
+        "full_name": "K. Murugan",
+        "role": "salesman",
+        "phone": "+91 98421 98765"
+    }
+    res = client.post("/api/v1/auth/register", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert "access_token" in data
+    assert data["username"] == "k_murugan"
+    assert data["role"] == "salesman"
+
+    # Try duplicate registration
+    res_dup = client.post("/api/v1/auth/register", json=payload)
+    assert res_dup.status_code == 400
+    assert "already registered" in res_dup.json()["detail"]
+
+
+def test_forgot_password_reset(client: TestClient):
+    """
+    Verify staff password reset and subsequent login with new password.
+    """
+    # 1. Reset password for salesman_a
+    res = client.post(
+        "/api/v1/auth/forgot-password",
+        json={"username": "salesman_a", "new_password": "brandnewpassword2026"}
+    )
+    assert res.status_code == 200
+    assert "updated successfully" in res.json()["message"]
+
+    # 2. Login with old password should fail
+    old_login = client.post("/api/v1/auth/login", data={"username": "salesman_a", "password": "sales123"})
+    assert old_login.status_code == 401
+
+    # 3. Login with new password should succeed
+    new_login = client.post("/api/v1/auth/login", data={"username": "salesman_a", "password": "brandnewpassword2026"})
+    assert new_login.status_code == 200
+    assert "access_token" in new_login.json()
