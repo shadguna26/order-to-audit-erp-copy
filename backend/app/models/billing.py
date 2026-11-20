@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, BigInteger, String, DateTime, Enum, ForeignKey, Text, Date
+from sqlalchemy import Column, Integer, BigInteger, String, DateTime, Enum, ForeignKey, Text, Date, Numeric
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
@@ -31,9 +31,9 @@ class PurchaseItem(Base):
     id = Column(Integer, primary_key=True, index=True)
     purchase_id = Column(Integer, ForeignKey("purchases.id", ondelete="CASCADE"), nullable=False)
     raw_material_id = Column(Integer, ForeignKey("raw_materials.id"), nullable=False)
-    input_qty = Column(BigInteger, nullable=False)                     # e.g. 60
+    input_qty = Column(Numeric(14, 4), nullable=False)                # e.g. 60.0000 kg
     input_unit = Column(String(20), nullable=False)                    # 'kg', 'l', 'piece'
-    qty_base = Column(BigInteger, nullable=False)                      # In base unit: 60000 g
+    qty_base = Column(Numeric(14, 4), nullable=False)                  # In base unit: 60000.0000 g
     rate_paise_per_unit = Column(BigInteger, nullable=False)           # e.g. 4500 paise per kg (Rs 45/kg)
     total_amount_paise = Column(BigInteger, nullable=False)            # e.g. 270000 paise (Rs 2,700)
 
