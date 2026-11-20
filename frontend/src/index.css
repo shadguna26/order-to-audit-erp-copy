@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #FFFDF7;
+  --text-primary: #1C1917;
+  --accent-turmeric: #D97706;
+  --accent-chilli: #DC2626;
+  --accent-leaf: #15803D;
+  --table-border: #E7E5E4;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Big touch target utility for salesman screens */
+.touch-target {
+  min-height: 48px;
+  min-width: 48px;
+}
