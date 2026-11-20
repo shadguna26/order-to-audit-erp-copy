@@ -43,7 +43,7 @@ class StockLedger(Base):
     direction = Column(Enum(StockDirection), nullable=False)      # IN or OUT
     qty_base = Column(Numeric(14, 4), nullable=False)             # Always positive Decimal in base units (g, ml, piece)
     base_unit = Column(Enum(BaseUnitType), nullable=False)
-    unit_cost_paise = Column(BigInteger, nullable=False, default=0) # Valuation at transaction time in paise
+    unit_cost_paise = Column(Numeric(14, 4), nullable=False, default=0) # Valuation at transaction time in paise/base unit
     source_doc_type = Column(Enum(StockDocType), nullable=False)
     source_doc_id = Column(Integer, nullable=False)               # Foreign ID of source transaction
     batch_no = Column(String(50), nullable=True)

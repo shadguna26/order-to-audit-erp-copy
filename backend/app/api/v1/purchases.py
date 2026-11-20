@@ -1,5 +1,5 @@
 from typing import List
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -74,9 +74,8 @@ def create_purchase(
         line_total_paise = int(item_in.input_qty * Decimal(item_in.rate_paise_per_unit))
         total_purchase_amount_paise += line_total_paise
 
-        # Unit cost valuation per base unit in paise
-        # e.g. 270,000 paise / 60,000 g = 4.5 paise/g (rounded to integer paise for valuation)
-        unit_cost_base_paise = int(round(line_total_paise / float(qty_base))) if qty_base > 0 else 0
+        # Unit cost valuation per base unit in paise (e.g. 270,000 paise / 60,000 g = 4.5000 paise/g)
+        unit_cost_base_paise = (Decimal(line_total_paise) / qty_base).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP) if qty_base > 0 else Decimal("0.0000")
 
         p_item = PurchaseItem(
             purchase_id=purchase.id,

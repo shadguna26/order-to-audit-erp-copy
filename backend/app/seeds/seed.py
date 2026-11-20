@@ -218,12 +218,12 @@ def seed_database(db: Session):
     opening_ledger_exists = db.query(StockLedger).filter(StockLedger.source_doc_type == StockDocType.OPENING_BALANCE).first()
     if not opening_ledger_exists:
         opening_entries = [
-            (StockItemType.RAW_MATERIAL, materials_map["RM-FLOUR"].id, StockLocationType.RAW, Decimal("100000.0"), BaseUnitType.G, 4), # 4.2 rounded to 4 paise/g base unit
-            (StockItemType.RAW_MATERIAL, materials_map["RM-OIL"].id, StockLocationType.RAW, Decimal("30000.0"), BaseUnitType.ML, 14), # 14 paise/ml
-            (StockItemType.RAW_MATERIAL, materials_map["RM-SPICE"].id, StockLocationType.RAW, Decimal("5000.0"), BaseUnitType.G, 20), # 20 paise/g
-            (StockItemType.RAW_MATERIAL, materials_map["PKG-POUCH-200G"].id, StockLocationType.PACKAGING, Decimal("500.0"), BaseUnitType.PIECE, 250), # 250 paise
-            (StockItemType.RAW_MATERIAL, materials_map["PKG-CARTON-20"].id, StockLocationType.PACKAGING, Decimal("30.0"), BaseUnitType.PIECE, 1500), # 1500 paise
-            (StockItemType.FINISHED_GOODS, murukku.id, StockLocationType.FINISHED, Decimal("50.0"), BaseUnitType.PIECE, 3500), # 50 packets opening
+            (StockItemType.RAW_MATERIAL, materials_map["RM-FLOUR"].id, StockLocationType.RAW, Decimal("100000.0"), BaseUnitType.G, Decimal("4.2000")), # Rs 42/kg = 4.2 paise/g
+            (StockItemType.RAW_MATERIAL, materials_map["RM-OIL"].id, StockLocationType.RAW, Decimal("30000.0"), BaseUnitType.ML, Decimal("14.0000")),   # Rs 140/L = 14 paise/ml
+            (StockItemType.RAW_MATERIAL, materials_map["RM-SPICE"].id, StockLocationType.RAW, Decimal("5000.0"), BaseUnitType.G, Decimal("20.0000")),   # Rs 200/kg = 20 paise/g
+            (StockItemType.RAW_MATERIAL, materials_map["PKG-POUCH-200G"].id, StockLocationType.PACKAGING, Decimal("500.0"), BaseUnitType.PIECE, Decimal("250.0000")), # Rs 2.50 = 250 paise
+            (StockItemType.RAW_MATERIAL, materials_map["PKG-CARTON-20"].id, StockLocationType.PACKAGING, Decimal("30.0"), BaseUnitType.PIECE, Decimal("1500.0000")),  # Rs 15 = 1500 paise
+            (StockItemType.FINISHED_GOODS, murukku.id, StockLocationType.FINISHED, Decimal("50.0"), BaseUnitType.PIECE, Decimal("3500.0000")), # 50 packets opening
         ]
 
         for item_type, item_id, loc_type, qty, unit, cost in opening_entries:

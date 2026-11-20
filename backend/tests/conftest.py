@@ -17,15 +17,8 @@ test_engine = create_engine(
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def setup_test_database():
-    # Remove old test database file if exists
-    if os.path.exists(TEST_DB_PATH):
-        try:
-            os.remove(TEST_DB_PATH)
-        except OSError:
-            pass
-
     Base.metadata.drop_all(bind=test_engine)
     Base.metadata.create_all(bind=test_engine)
     db = TestingSessionLocal()
@@ -35,11 +28,6 @@ def setup_test_database():
     yield
 
     Base.metadata.drop_all(bind=test_engine)
-    if os.path.exists(TEST_DB_PATH):
-        try:
-            os.remove(TEST_DB_PATH)
-        except OSError:
-            pass
 
 @pytest.fixture(scope="function")
 def db():

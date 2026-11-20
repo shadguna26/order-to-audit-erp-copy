@@ -21,7 +21,7 @@ def record_stock_movement(
     direction: StockDirection,
     qty_base: Decimal,
     base_unit: BaseUnitType,
-    unit_cost_paise: int,
+    unit_cost_paise: Decimal,
     source_doc_type: StockDocType,
     source_doc_id: int,
     created_by: int,
