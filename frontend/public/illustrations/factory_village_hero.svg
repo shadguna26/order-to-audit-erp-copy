@@ -1,0 +1,240 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 540" width="100%" height="100%" fill="none">
+  <!-- Definitions: Patterns & Gradients restricted strictly to natural terracotta/cream/turmeric warmth -->
+  <defs>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFF5E0"/>
+      <stop offset="70%" stop-color="#FAF0D6"/>
+      <stop offset="100%" stop-color="#F2E4C2"/>
+    </linearGradient>
+    <linearGradient id="sunGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D9A21B" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#D9A21B" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sky Background -->
+  <rect width="800" height="540" fill="url(#skyGrad)"/>
+
+  <!-- Morning Sun -->
+  <circle cx="620" cy="140" r="90" fill="url(#sunGlow)"/>
+  <circle cx="620" cy="140" r="42" fill="#D9A21B" opacity="0.45"/>
+
+  <!-- Distant Temple Gopuram & Greenery Horizon -->
+  <path d="M530 290 L545 230 L550 200 L555 185 L560 185 L565 200 L570 230 L585 290 Z" fill="#D6C7A8" stroke="#2B1D10" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Gopuram tiers -->
+  <line x1="538" y1="260" x2="577" y2="260" stroke="#2B1D10" stroke-width="1.5"/>
+  <line x1="544" y1="235" x2="571" y2="235" stroke="#2B1D10" stroke-width="1.5"/>
+  <line x1="549" y1="210" x2="566" y2="210" stroke="#2B1D10" stroke-width="1.5"/>
+  <!-- Kalasams on top -->
+  <circle cx="557" cy="180" r="3" fill="#D9A21B" stroke="#2B1D10" stroke-width="1"/>
+  <circle cx="563" cy="180" r="3" fill="#D9A21B" stroke="#2B1D10" stroke-width="1"/>
+
+  <!-- Background Coconut Palms & Banana Grove -->
+  <g stroke="#2B1D10" stroke-width="1.5" stroke-linecap="round">
+    <!-- Distant palm 1 -->
+    <path d="M470 290 Q485 220 500 170" fill="none"/>
+    <path d="M500 170 Q465 160 450 175" fill="#5B9445"/>
+    <path d="M500 170 Q485 145 470 145" fill="#3F6B2F"/>
+    <path d="M500 170 Q515 140 535 150" fill="#5B9445"/>
+    <path d="M500 170 Q535 165 540 185" fill="#3F6B2F"/>
+  </g>
+
+  <!-- Distant Low Ridge / Fields -->
+  <path d="M0 320 Q200 295 440 310 Q600 295 800 315 L800 360 L0 360 Z" fill="#E8DBBF"/>
+  <line x1="0" y1="320" x2="800" y2="315" stroke="#2B1D10" stroke-width="1.5"/>
+
+  <!-- ==================== SRI LAKSHMI SNACKS FACTORY ==================== -->
+  <!-- Factory Main Body -->
+  <rect x="80" y="230" width="310" height="150" fill="#FFFBF0" stroke="#2B1D10" stroke-width="2"/>
+  
+  <!-- Foundation Plinth -->
+  <rect x="74" y="370" width="322" height="18" fill="#D6C7A8" stroke="#2B1D10" stroke-width="2"/>
+
+  <!-- Factory Pitched Terracotta Roof with Traditional Mangalore Tiles -->
+  <polygon points="60,230 235,140 410,230" fill="#B5532A" stroke="#2B1D10" stroke-width="2"/>
+  <!-- Roof Tile Ridge lines -->
+  <g stroke="#96421F" stroke-width="1.5">
+    <line x1="85" y1="230" x2="235" y2="140"/>
+    <line x1="120" y1="230" x2="235" y2="140"/>
+    <line x1="155" y1="230" x2="235" y2="140"/>
+    <line x1="190" y1="230" x2="235" y2="140"/>
+    <line x1="225" y1="230" x2="235" y2="140"/>
+    <line x1="250" y1="230" x2="235" y2="140"/>
+    <line x1="285" y1="230" x2="235" y2="140"/>
+    <line x1="320" y1="230" x2="235" y2="140"/>
+    <line x1="355" y1="230" x2="235" y2="140"/>
+    <line x1="385" y1="230" x2="235" y2="140"/>
+  </g>
+  <!-- Roof top ridge cap -->
+  <polygon points="56,230 235,136 414,230 406,233 235,142 64,233" fill="#96421F" stroke="#2B1D10" stroke-width="1.5"/>
+
+  <!-- Traditional Chimney with aroma steam -->
+  <rect x="130" y="110" width="32" height="70" fill="#B5532A" stroke="#2B1D10" stroke-width="2"/>
+  <rect x="126" y="105" width="40" height="8" fill="#96421F" stroke="#2B1D10" stroke-width="1.5"/>
+  <!-- Gentle aroma steam trails -->
+  <path d="M142 98 Q148 85 142 72 Q136 60 144 48" stroke="#D6C7A8" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.6"/>
+  <path d="M152 95 Q158 80 152 68 Q148 55 156 42" stroke="#D6C7A8" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.5"/>
+
+  <!-- Wooden Facade Signboard -->
+  <rect x="125" y="245" width="220" height="34" rx="3" fill="#D9A21B" stroke="#2B1D10" stroke-width="1.8"/>
+  <rect x="129" y="249" width="212" height="26" fill="#FAF3E3" stroke="#B5532A" stroke-width="1"/>
+  <text x="235" y="266" font-family="'Fraunces', serif" font-weight="700" font-size="12" fill="#B5532A" text-anchor="middle" letter-spacing="1.2">SRI LAKSHMI SNACKS</text>
+  <text x="235" y="278" font-family="'Noto Sans Tamil', sans-serif" font-weight="600" font-size="7.5" fill="#2B1D10" text-anchor="middle">திருச்சிராப்பள்ளி • பாரம்பரிய சுவை</text>
+
+  <!-- Large Factory Wooden Shutter Door -->
+  <rect x="195" y="295" width="80" height="75" fill="#B5532A" stroke="#2B1D10" stroke-width="2"/>
+  <line x1="235" y1="295" x2="235" y2="370" stroke="#2B1D10" stroke-width="1.5"/>
+  <!-- Shutter Slats -->
+  <line x1="195" y1="310" x2="275" y2="310" stroke="#96421F" stroke-width="1"/>
+  <line x1="195" y1="325" x2="275" y2="325" stroke="#96421F" stroke-width="1"/>
+  <line x1="195" y1="340" x2="275" y2="340" stroke="#96421F" stroke-width="1"/>
+  <line x1="195" y1="355" x2="275" y2="355" stroke="#96421F" stroke-width="1"/>
+  <!-- Door Threshold Kolam -->
+  <circle cx="225" cy="376" r="1.5" fill="#FFFBF0"/>
+  <circle cx="235" cy="376" r="2" fill="#FFFBF0"/>
+  <circle cx="245" cy="376" r="1.5" fill="#FFFBF0"/>
+
+  <!-- Factory Ventilation Windows with Timber Louvres -->
+  <g fill="#FAF3E3" stroke="#2B1D10" stroke-width="1.8">
+    <rect x="105" y="295" width="55" height="48" rx="2"/>
+    <rect x="310" y="295" width="55" height="48" rx="2"/>
+  </g>
+  <g stroke="#2B1D10" stroke-width="1.2">
+    <line x1="105" y1="311" x2="160" y2="311"/>
+    <line x1="105" y1="327" x2="160" y2="327"/>
+    <line x1="132" y1="295" x2="132" y2="343"/>
+
+    <line x1="310" y1="311" x2="365" y2="311"/>
+    <line x1="310" y1="327" x2="365" y2="327"/>
+    <line x1="337" y1="295" x2="337" y2="343"/>
+  </g>
+
+  <!-- ==================== VILLAGE CORNER SHOP (KIRANA / TEA STALL) ==================== -->
+  <rect x="420" y="260" width="180" height="120" fill="#FFFBF0" stroke="#2B1D10" stroke-width="2"/>
+  <!-- Slanted Shop Awning / Thinnai Roof -->
+  <polygon points="410,260 510,215 610,260" fill="#B5532A" stroke="#2B1D10" stroke-width="2"/>
+  <g stroke="#96421F" stroke-width="1.2">
+    <line x1="435" y1="260" x2="510" y2="215"/>
+    <line x1="465" y1="260" x2="510" y2="215"/>
+    <line x1="495" y1="260" x2="510" y2="215"/>
+    <line x1="535" y1="260" x2="510" y2="215"/>
+    <line x1="565" y1="260" x2="510" y2="215"/>
+    <line x1="595" y1="260" x2="510" y2="215"/>
+  </g>
+  <!-- Wooden Thinnai Pillars -->
+  <line x1="435" y1="260" x2="435" y2="370" stroke="#2B1D10" stroke-width="2.5"/>
+  <line x1="585" y1="260" x2="585" y2="370" stroke="#2B1D10" stroke-width="2.5"/>
+  <!-- Shop Counter -->
+  <rect x="445" y="325" width="130" height="45" fill="#FAF3E3" stroke="#2B1D10" stroke-width="1.8"/>
+  <line x1="445" y1="340" x2="575" y2="340" stroke="#2B1D10" stroke-width="1"/>
+  <!-- Glass Jars on counter with golden snacks -->
+  <rect x="455" y="306" width="18" height="19" rx="3" fill="#FFFBF0" stroke="#2B1D10" stroke-width="1.4"/>
+  <circle cx="464" cy="316" r="6" fill="#D9A21B"/>
+  <rect x="480" y="306" width="18" height="19" rx="3" fill="#FFFBF0" stroke="#2B1D10" stroke-width="1.4"/>
+  <circle cx="489" cy="316" r="6" fill="#B5532A"/>
+  <rect x="505" y="306" width="18" height="19" rx="3" fill="#FFFBF0" stroke="#2B1D10" stroke-width="1.4"/>
+  <circle cx="514" cy="316" r="6" fill="#D9A21B"/>
+  <!-- Brass Davarah Tumbler on counter -->
+  <path d="M545 316 L548 325 L558 325 L561 316 Z" fill="#D9A21B" stroke="#2B1D10" stroke-width="1.2"/>
+  <rect x="548" y="311" width="10" height="6" fill="#D9A21B" stroke="#2B1D10" stroke-width="1.2"/>
+
+  <!-- ==================== TALL PROUD COCONUT PALM TREE ==================== -->
+  <g stroke="#2B1D10" stroke-linecap="round">
+    <!-- Curved Trunk with rings -->
+    <path d="M680 390 Q655 240 645 110" fill="none" stroke="#6B5543" stroke-width="14"/>
+    <path d="M680 390 Q655 240 645 110" fill="none" stroke="#2B1D10" stroke-width="1.8"/>
+    <!-- Trunk texture notches -->
+    <path d="M670 330 L678 333 M664 280 L672 283 M656 230 L664 233 M651 180 L658 183 M646 140 L653 143" stroke="#2B1D10" stroke-width="1.5"/>
+
+    <!-- Lush Palm Fronds radiating outward -->
+    <g stroke-width="1.8">
+      <!-- Left fronds -->
+      <path d="M645 110 Q580 90 540 130" fill="#3F6B2F"/>
+      <path d="M645 110 Q595 65 565 85" fill="#5B9445"/>
+      <!-- Top fronds -->
+      <path d="M645 110 Q630 40 645 30 Q660 40 645 110" fill="#3F6B2F"/>
+      <path d="M645 110 Q665 45 685 70" fill="#5B9445"/>
+      <!-- Right fronds -->
+      <path d="M645 110 Q710 75 745 105" fill="#3F6B2F"/>
+      <path d="M645 110 Q725 115 750 155" fill="#5B9445"/>
+      <!-- Hanging coconuts cluster -->
+      <circle cx="638" cy="115" r="5.5" fill="#6B5543" stroke="#2B1D10" stroke-width="1.2"/>
+      <circle cx="646" cy="118" r="5" fill="#5B9445" stroke="#2B1D10" stroke-width="1.2"/>
+      <circle cx="652" cy="114" r="5.5" fill="#6B5543" stroke="#2B1D10" stroke-width="1.2"/>
+    </g>
+  </g>
+
+  <!-- Large Banana Leaf Shrub at Shop Base -->
+  <g fill="#3F6B2F" stroke="#2B1D10" stroke-width="1.5">
+    <path d="M610 380 Q625 330 595 310 Q635 340 610 380 Z"/>
+    <path d="M620 380 Q655 335 680 345 Q640 365 620 380 Z"/>
+    <path d="M615 385 Q600 345 570 345 Q605 365 615 385 Z" fill="#5B9445"/>
+  </g>
+
+  <!-- ==================== VILLAGE ROAD & FOREGROUND ==================== -->
+  <path d="M0 380 Q350 375 800 380 L800 540 L0 540 Z" fill="#FAF3E3"/>
+  <!-- Earthen track path -->
+  <path d="M0 410 Q400 395 800 420 L800 540 L0 540 Z" fill="#F0E3C5"/>
+  <path d="M0 460 Q380 435 800 470 L800 540 L0 540 Z" fill="#E6D3B0"/>
+  <!-- Road boundary lines -->
+  <path d="M0 380 Q350 375 800 380" stroke="#2B1D10" stroke-width="2" fill="none"/>
+  <path d="M0 410 Q400 395 800 420" stroke="#D6C7A8" stroke-width="1.5" stroke-dasharray="6,6" fill="none"/>
+
+  <!-- Delivery Cart / Three-Wheeler standing by factory -->
+  <g id="delivery-cart" stroke="#2B1D10" stroke-width="1.5" stroke-linejoin="round">
+    <!-- Cart Body -->
+    <rect x="45" y="385" width="55" height="30" fill="#B5532A"/>
+    <!-- Snack Cartons stacked inside -->
+    <rect x="52" y="373" width="18" height="12" fill="#D9A21B"/>
+    <rect x="73" y="373" width="18" height="12" fill="#D9A21B"/>
+    <line x1="52" y1="379" x2="70" y2="379" stroke="#96421F" stroke-width="1"/>
+    <line x1="73" y1="379" x2="91" y2="379" stroke="#96421F" stroke-width="1"/>
+    <!-- Cart Handles & Chassis -->
+    <line x1="100" y1="395" x2="115" y2="390" stroke="#2B1D10" stroke-width="2"/>
+    <line x1="100" y1="405" x2="115" y2="400" stroke="#2B1D10" stroke-width="2"/>
+    <!-- Cart Wheels -->
+    <circle cx="60" cy="420" r="12" fill="#FAF3E3" stroke="#2B1D10" stroke-width="2"/>
+    <circle cx="60" cy="420" r="4" fill="#2B1D10"/>
+    <circle cx="90" cy="420" r="12" fill="#FAF3E3" stroke="#2B1D10" stroke-width="2"/>
+    <circle cx="90" cy="420" r="4" fill="#2B1D10"/>
+  </g>
+
+  <!-- Respectful South Indian Villager walking along road -->
+  <g id="local-shopper" stroke="#2B1D10" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Cloth Market Bag in hand -->
+    <rect x="362" y="445" width="16" height="22" rx="2" fill="#D9A21B"/>
+    <path d="M366 445 Q370 435 374 445" fill="none" stroke="#2B1D10" stroke-width="1.5"/>
+    <!-- Legs / White Dhoti / Veshti with simple golden border -->
+    <polygon points="340,435 330,480 345,480 348,435" fill="#FFFBF0"/>
+    <polygon points="348,435 352,480 366,480 357,435" fill="#FFFBF0"/>
+    <line x1="330" y1="475" x2="345" y2="475" stroke="#D9A21B" stroke-width="1.5"/>
+    <line x1="352" y1="475" x2="366" y2="475" stroke="#D9A21B" stroke-width="1.5"/>
+    <!-- Slippers -->
+    <line x1="326" y1="482" x2="345" y2="482" stroke="#2B1D10" stroke-width="2"/>
+    <line x1="350" y1="482" x2="369" y2="482" stroke="#2B1D10" stroke-width="2"/>
+    <!-- Torso / Cotton Shirt -->
+    <rect x="337" y="395" width="24" height="42" rx="3" fill="#B5532A"/>
+    <!-- Arm carrying bag -->
+    <path d="M358 402 Q370 420 370 445" fill="none" stroke="#2B1D10" stroke-width="3"/>
+    <!-- Head & Traditional Angavastram towel on shoulder -->
+    <circle cx="349" cy="380" r="10" fill="#E8DBBF"/>
+    <!-- Hair bun / Kudumi profile -->
+    <circle cx="343" cy="378" r="4" fill="#2B1D10"/>
+    <!-- Cotton angavastram folded on left shoulder -->
+    <path d="M336 395 Q334 415 336 430" fill="none" stroke="#FFFBF0" stroke-width="4"/>
+    <path d="M336 395 Q334 415 336 430" fill="none" stroke="#2B1D10" stroke-width="1"/>
+  </g>
+
+  <!-- Kolam Pattern along bottom corner border -->
+  <g fill="#B5532A" opacity="0.65">
+    <circle cx="700" cy="510" r="2"/>
+    <circle cx="715" cy="510" r="2"/>
+    <circle cx="730" cy="510" r="2"/>
+    <circle cx="745" cy="510" r="2"/>
+    <circle cx="700" cy="525" r="2"/>
+    <circle cx="715" cy="525" r="2"/>
+    <circle cx="730" cy="525" r="2"/>
+    <circle cx="745" cy="525" r="2"/>
+    <path d="M700 510 Q707 500 715 510 Q722 520 730 510 Q737 500 745 510 Q752 525 745 525 Q737 535 730 525 Q722 515 715 525 Q707 535 700 525 Z" fill="none" stroke="#B5532A" stroke-width="1.2"/>
+  </g>
+</svg>

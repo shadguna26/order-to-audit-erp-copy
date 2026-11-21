@@ -27,14 +27,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const root = document.documentElement;
     if (theme === 'night') {
       root.classList.add('dark');
-      root.style.setProperty('--bg-primary', '#18181B');
-      root.style.setProperty('--text-primary', '#FAFAFA');
-      root.style.setProperty('--table-border', '#27272A');
     } else {
       root.classList.remove('dark');
-      root.style.setProperty('--bg-primary', '#FFFDF7');
-      root.style.setProperty('--text-primary', '#1C1917');
-      root.style.setProperty('--table-border', '#E7E5E4');
     }
     localStorage.setItem('erp_theme', theme);
   }, [theme]);

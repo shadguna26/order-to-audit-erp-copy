@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Sun, Moon, LogOut, Building2 } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import { useTheme } from './context/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -37,8 +38,8 @@ export const App: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-cream text-stone-600 text-sm">
-        Loading system session...
+      <div className="min-h-screen flex items-center justify-center bg-page text-soil-muted text-sm font-body">
+        Loading session...
       </div>
     );
   }
@@ -68,46 +69,39 @@ export const App: React.FC = () => {
   const visibleTabs = availableTabs.filter(tab => isSuperUser || tab.roleFilter.includes(user.role));
 
   return (
-    <div className="min-h-screen flex flex-col bg-cream dark:bg-stone-950 text-stone-900 dark:text-stone-100 transition-colors">
-      {/* Top Application Header */}
-      <header className="bg-white dark:bg-stone-900 border-b border-stone-300 dark:border-stone-800 px-4 sm:px-6 py-3 flex flex-wrap justify-between items-center gap-3 shadow-sm">
+    <div className="min-h-screen flex flex-col bg-page graph-paper-grid text-soil transition-colors font-body">
+      {/* Terracotta Top Application Header */}
+      <header className="bg-terracotta text-white px-4 sm:px-6 py-2.5 flex flex-wrap justify-between items-center gap-3 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-turmeric-500 shadow-sm shrink-0 bg-stone-900">
-            <img
-              src="/images/snacks_showcase.jpg"
-              alt="Sri Lakshmi Snacks"
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
+          <div className="w-9 h-9 rounded bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0">
+            <Building2 className="w-5 h-5 text-white" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase font-bold text-turmeric-700 dark:text-turmeric-400 tracking-wider">
+              <span className="text-[11px] uppercase font-bold tracking-wider text-amber-200">
                 {t('brand')} • Tiruchirappalli
               </span>
-              <span className="text-[10px] bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-mono px-1.5 py-0.5 rounded border border-stone-300 dark:border-stone-700">
+              <span className="text-[10px] bg-black/20 text-white font-mono px-1.5 py-0.2 rounded border border-white/20">
                 TN-33
               </span>
             </div>
-            <h1 className="text-base sm:text-lg font-bold text-stone-900 dark:text-white leading-tight">
+            <h1 className="text-base sm:text-lg font-heading font-bold text-white leading-tight">
               Order-to-Audit ERP
             </h1>
           </div>
         </div>
 
         {/* Global Controls & User Info */}
-        <div className="flex items-center gap-3 sm:gap-4 text-xs">
+        <div className="flex items-center gap-3 text-xs">
           {/* Language Toggle */}
-          <div className="flex items-center bg-stone-100 dark:bg-stone-800 rounded p-0.5 border border-stone-300 dark:border-stone-700">
+          <div className="flex items-center bg-black/20 rounded p-0.5 border border-white/20">
             <button
               type="button"
               onClick={() => changeLanguage('en')}
-              className={`px-2.5 py-1 rounded font-medium transition ${
+              className={`px-2 py-0.5 rounded text-xs font-semibold transition ${
                 language === 'en'
-                  ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-white shadow-xs font-bold'
-                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'
+                  ? 'bg-white text-terracotta font-bold'
+                  : 'text-white/80 hover:text-white'
               }`}
             >
               EN
@@ -115,10 +109,10 @@ export const App: React.FC = () => {
             <button
               type="button"
               onClick={() => changeLanguage('ta')}
-              className={`px-2.5 py-1 rounded font-medium transition ${
+              className={`px-2 py-0.5 rounded text-xs font-semibold font-tamil transition ${
                 language === 'ta'
-                  ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-white shadow-xs font-bold'
-                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'
+                  ? 'bg-white text-terracotta font-bold'
+                  : 'text-white/80 hover:text-white'
               }`}
             >
               தமிழ்
@@ -129,27 +123,27 @@ export const App: React.FC = () => {
           <button
             type="button"
             onClick={toggleTheme}
-            className="flex items-center gap-1.5 px-3 py-1.5 border border-stone-300 dark:border-stone-700 rounded bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-750 transition font-medium"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-black/20 border border-white/20 text-white hover:bg-black/30 transition text-xs font-medium"
             title="Toggle Day/Night mode"
           >
             {theme === 'day' ? (
               <>
-                <span>☀️</span>
-                <span className="hidden sm:inline">Day Mode</span>
+                <Sun className="w-3.5 h-3.5 text-amber-200" />
+                <span className="hidden sm:inline">Day</span>
               </>
             ) : (
               <>
-                <span>🌙</span>
-                <span className="hidden sm:inline">Night Mode</span>
+                <Moon className="w-3.5 h-3.5 text-amber-200" />
+                <span className="hidden sm:inline">Night</span>
               </>
             )}
           </button>
 
           {/* User profile & Role Badge */}
-          <div className="text-right pl-2 border-l border-stone-300 dark:border-stone-700">
-            <div className="font-semibold text-stone-900 dark:text-white">{user.full_name}</div>
-            <div className="text-[11px] font-mono uppercase text-stone-500">
-              Role: <span className="font-bold text-turmeric-700 dark:text-turmeric-400">{user.role}</span>
+          <div className="text-right pl-2 border-l border-white/20 hidden sm:block">
+            <div className="font-semibold text-white">{user.full_name}</div>
+            <div className="text-[10px] font-mono uppercase text-amber-200">
+              Role: <span className="font-bold">{user.role}</span>
             </div>
           </div>
 
@@ -157,15 +151,16 @@ export const App: React.FC = () => {
           <button
             type="button"
             onClick={logout}
-            className="px-3 py-1.5 text-xs border border-stone-300 dark:border-stone-700 hover:border-chilli-600 hover:text-chilli-600 dark:hover:text-chilli-400 rounded bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 transition-colors font-medium"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs border border-white/30 hover:bg-white hover:text-terracotta rounded text-white transition-colors font-semibold"
           >
-            {t('nav.sign_out')}
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{t('nav.sign_out')}</span>
           </button>
         </div>
       </header>
 
       {/* Role Navigation Bar */}
-      <nav className="bg-stone-100 dark:bg-stone-900/80 border-b border-stone-300 dark:border-stone-800 px-4 sm:px-6 py-1.5">
+      <nav className="bg-card solid-card border-x-0 border-t-0 px-4 sm:px-6 py-1.5">
         <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto">
           {visibleTabs.map((tab) => {
             const isActive = activeTab === tab.key;
@@ -174,10 +169,10 @@ export const App: React.FC = () => {
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-2 text-xs font-bold rounded transition whitespace-nowrap ${
+                className={`px-3.5 py-1.5 text-xs font-bold rounded transition whitespace-nowrap ${
                   isActive
-                    ? 'bg-turmeric-600 text-white shadow-xs'
-                    : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-800'
+                    ? 'bg-terracotta text-white shadow-xs'
+                    : 'text-soil-muted hover:text-soil hover:bg-card-subtle'
                 }`}
               >
                 {tab.label}

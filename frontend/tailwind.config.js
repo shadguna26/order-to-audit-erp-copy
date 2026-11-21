@@ -8,39 +8,38 @@ export default {
   theme: {
     extend: {
       colors: {
-        cream: {
-          50: '#FFFEFA',
-          100: '#FFFDF5',
-          200: '#FFF9E6',
-          300: '#FFF3CC',
-          DEFAULT: '#FFFDF7'
+        page: 'var(--bg-page)',
+        card: {
+          DEFAULT: 'var(--bg-card)',
+          subtle: 'var(--bg-card-subtle)'
         },
-        turmeric: {
-          50: '#FFFBEB',
-          100: '#FEF3C7',
-          500: '#F59E0B',
-          600: '#D97706',
-          700: '#B45309',
-          DEFAULT: '#D97706'
+        soil: {
+          DEFAULT: 'var(--text-main)',
+          muted: 'var(--text-muted)'
         },
-        chilli: {
-          50: '#FEF2F2',
-          100: '#FEE2E2',
-          600: '#DC2626',
-          700: '#B91C1C',
-          DEFAULT: '#DC2626'
+        terracotta: {
+          DEFAULT: 'var(--accent-terracotta)',
+          hover: 'var(--accent-terracotta-hover)'
         },
         leaf: {
-          50: '#F0FDF4',
-          100: '#DCFCE7',
-          600: '#16A34A',
-          700: '#15803D',
-          DEFAULT: '#15803D'
-        }
+          DEFAULT: 'var(--success-leaf)',
+          hover: 'var(--success-leaf-hover)'
+        },
+        turmeric: {
+          DEFAULT: 'var(--warning-turmeric)',
+          hover: 'var(--warning-turmeric-hover)'
+        },
+        chilli: {
+          DEFAULT: 'var(--danger-chilli)',
+          hover: 'var(--danger-chilli-hover)'
+        },
+        'card-border': 'var(--border-card)'
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        tamil: ['Noto Sans Tamil', 'sans-serif']
+        heading: ['Fraunces', 'Noto Serif Tamil', 'serif'],
+        body: ['Inter', 'Mukta', 'Noto Sans Tamil', 'sans-serif'],
+        tamil: ['Noto Sans Tamil', 'sans-serif'],
+        'tamil-heading': ['Noto Serif Tamil', 'serif']
       }
     },
   },

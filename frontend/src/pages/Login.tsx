@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { LogIn, UserPlus, KeyRound, CheckCircle2, AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react';
 import { loginUser, registerUser, resetPassword } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { KolamDivider } from '../components/KolamDivider';
 
 type AuthMode = 'login' | 'register' | 'forgot';
 
@@ -44,7 +46,7 @@ export const Login: React.FC = () => {
         is_active: true
       });
     } catch (err: any) {
-      setError(err.message || 'Login failed. Please check credentials.');
+      setError(err.message || 'Incorrect username or password. Please verify credentials.');
     } finally {
       setIsSubmitting(false);
     }
@@ -68,7 +70,7 @@ export const Login: React.FC = () => {
         role: regRole,
         phone: regPhone.trim() || undefined
       });
-      setSuccessMsg(`Account created for ${data.full_name}! Signing you in...`);
+      setSuccessMsg(`Account created for ${data.full_name}. Signing into portal...`);
       setTimeout(() => {
         login(data.access_token, {
           id: 0,
@@ -77,7 +79,7 @@ export const Login: React.FC = () => {
           role: data.role,
           is_active: true
         });
-      }, 900);
+      }, 800);
     } catch (err: any) {
       setError(err.message || 'Registration failed.');
     } finally {
@@ -109,7 +111,7 @@ export const Login: React.FC = () => {
       setPassword(newPassword);
       setTimeout(() => {
         setMode('login');
-        setSuccessMsg('Password updated! You can now sign in with your new password.');
+        setSuccessMsg('Password updated. You can now sign in with your new credentials.');
       }, 1200);
     } catch (err: any) {
       setError(err.message || 'Password reset failed.');
@@ -120,163 +122,176 @@ export const Login: React.FC = () => {
 
   const quickRoles = [
     { label: 'Salesman A', u: 'salesman_a', p: 'sales123', role: 'Sales / Retail Orders' },
-    { label: 'Factory Admin', u: 'admin', p: 'admin123', role: 'Orders, Invoicing & Dispatch' },
+    { label: 'Factory Admin', u: 'admin', p: 'admin123', role: 'Approval & Invoicing' },
     { label: 'Production', u: 'production', p: 'prod123', role: 'BOM & Batch Runs' },
-    { label: 'Accountant', u: 'accountant', p: 'acct123', role: 'Audit Registers & GST' },
+    { label: 'Accountant', u: 'accountant', p: 'acct123', role: 'Read-only Audit' },
     { label: 'Owner', u: 'owner', p: 'owner123', role: 'Executive Overview' },
   ];
 
   return (
-    <div className="min-h-screen bg-cream dark:bg-stone-950 flex items-center justify-center p-3 sm:p-6 text-stone-900 dark:text-stone-100">
-      <div className="w-full max-w-5xl bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-800 rounded-xl shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[640px]">
+    <div className="min-h-screen graph-paper-grid flex items-center justify-center p-4 sm:p-8 text-soil">
+      {/* Main 12-Column Grid Container */}
+      <div className="w-full max-w-5xl solid-card rounded-lg overflow-hidden grid grid-cols-1 lg:grid-cols-12 border border-card-border">
         
-        {/* Left Column: Authentic South Indian Market Heritage Hero */}
-        <div className="lg:col-span-5 relative bg-stone-900 flex flex-col justify-between p-6 sm:p-8 text-white overflow-hidden min-h-[300px] lg:min-h-auto">
-          {/* Market Hero Image with gradient overlay */}
-          <div className="absolute inset-0 z-0">
-            <img
-              src="/images/market_hero.jpg"
-              alt="Sri Lakshmi Snacks Traditional Market Bazaar"
-              className="w-full h-full object-cover object-center opacity-75 transform scale-105 hover:scale-100 transition-transform duration-1000"
-              onError={(e) => {
-                // Fallback to png if jpg fails
-                (e.target as HTMLImageElement).src = '/images/market_hero.png';
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/30" />
-          </div>
-
-          {/* Header Brand Badge */}
-          <div className="relative z-10 space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-turmeric-600/90 border border-turmeric-400 text-white text-[11px] font-bold uppercase tracking-wider rounded-full shadow-sm">
-              <span>🌾</span>
-              <span>Traditional South Indian Snack House</span>
+        {/* Left Column (5 of 12 cols): Hand-Crafted South Indian Factory Illustration Hero */}
+        <div className="lg:col-span-5 bg-card-subtle p-6 sm:p-8 border-b lg:border-b-0 lg:border-r border-card-border flex flex-col justify-between">
+          <div>
+            {/* Header Identity Badge */}
+            <div className="flex items-center gap-2 mb-3">
+              <span className="rubber-stamp rubber-stamp-approved">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>TN-33 Registered</span>
+              </span>
+              <span className="text-xs text-soil-muted font-mono">EST. 1988</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">
-              ஸ்ரீ லக்ஷ்மி ஸ்நாக்ஸ்
-            </h2>
-            <p className="text-xs text-amber-200 font-medium">
-              Sri Lakshmi Snacks • Thuvakudi Industrial Estate, Tiruchirappalli
+
+            <h1 className="text-2xl sm:text-3xl font-heading font-bold text-soil leading-tight">
+              Sri Lakshmi Snacks
+            </h1>
+            <p className="font-tamil text-sm text-terracotta font-semibold mt-0.5">
+              ஸ்ரீ லக்ஷ்மி ஸ்நாக்ஸ் • திருச்சிராப்பள்ளி
             </p>
-          </div>
+            <p className="text-xs text-soil-muted mt-2 leading-relaxed">
+              Order-to-Audit Factory ERP • Thuvakudi Industrial Estate, Tiruchirappalli, Tamil Nadu
+            </p>
 
-          {/* Center Showcase Details */}
-          <div className="relative z-10 my-6 space-y-3">
-            <div className="bg-black/50 backdrop-blur-xs border border-white/10 rounded-lg p-3 text-xs space-y-1.5">
-              <div className="flex items-center gap-2 text-amber-300 font-bold">
-                <span>✨</span>
-                <span>Authentic Taste • Pure Sesame & Groundnut Oil</span>
-              </div>
-              <p className="text-[11px] text-stone-300 leading-relaxed">
-                Handcrafted Kai Murukku, spicy Madras Mixture, Ribbon Pakoda, Thattai and ghee sweets prepared daily according to legacy Tamil recipes.
-              </p>
-            </div>
+            <KolamDivider className="my-4" />
 
-            <div className="grid grid-cols-2 gap-2 text-[11px]">
-              <div className="bg-white/10 border border-white/10 rounded p-2 text-center">
-                <span className="block font-bold text-white text-base">33AABCS...</span>
-                <span className="text-stone-300 text-[10px]">TN GST Registered</span>
-              </div>
-              <div className="bg-white/10 border border-white/10 rounded p-2 text-center">
-                <span className="block font-bold text-turmeric-400 text-base">100% Audit</span>
-                <span className="text-stone-300 text-[10px]">Append-Only Ledger</span>
-              </div>
+            {/* Hand-Drawn Village Street & Factory 2D Illustration */}
+            <div className="rounded-md border border-card-border overflow-hidden bg-card shadow-xs mt-3">
+              <img
+                src="/illustrations/factory_village_hero.svg"
+                alt="Sri Lakshmi Snacks village factory and traditional shops in Tiruchirappalli"
+                loading="lazy"
+                className="w-full h-auto object-cover block"
+                width="800"
+                height="540"
+              />
             </div>
           </div>
 
-          {/* Bottom Footer Quote */}
-          <div className="relative z-10 border-t border-white/20 pt-3 flex justify-between items-center text-[11px] text-stone-300">
-            <span>Tiruchirappalli, Tamil Nadu</span>
-            <span className="font-mono text-amber-300">EST. 1988</span>
+          {/* Calm Heritage Notes at Base */}
+          <div className="mt-6 pt-4 border-t border-card-border text-xs text-soil-muted space-y-1.5">
+            <div className="flex items-center justify-between text-[11px] font-mono">
+              <span>GSTIN: 33AABCS1234F1Z8</span>
+              <span className="font-semibold text-soil">State Code: 33 (TN)</span>
+            </div>
+            <p className="text-[11px] leading-normal">
+              Single append-only stock ledger source of truth. All batch transactions recorded in base units with zero floating-point math.
+            </p>
           </div>
         </div>
 
-        {/* Right Column: Authentication & Staff Registration Hub */}
-        <div className="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between bg-white dark:bg-stone-900">
+        {/* Right Column (7 of 12 cols): Structured Authentication & Registration Workspace */}
+        <div className="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between bg-card">
           <div>
-            {/* Top Navigation Tabs: Sign In / Register / Forgot Password */}
-            <div className="flex border-b border-stone-200 dark:border-stone-800 pb-3 mb-6 gap-2 sm:gap-4 overflow-x-auto">
+            {/* Section Pattern: Small uppercase label + Clear Heading */}
+            <div className="mb-4">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-soil-muted block">
+                Factory Access Portal
+              </span>
+              <div className="flex items-center justify-between mt-1">
+                <h2 className="text-xl sm:text-2xl font-heading font-bold text-soil">
+                  {mode === 'login' && 'Staff Sign In'}
+                  {mode === 'register' && 'New Staff Member Registration'}
+                  {mode === 'forgot' && 'Reset Staff Password'}
+                </h2>
+                <span className="text-xs font-tamil text-soil-muted">
+                  {mode === 'login' && 'உள்நுழைக'}
+                  {mode === 'register' && 'புதிய பதிவு'}
+                  {mode === 'forgot' && 'கடவுச்சொல்'}
+                </span>
+              </div>
+            </div>
+
+            {/* Navigational Tabs: Clean Terracotta Underlines */}
+            <div className="flex border-b border-card-border mb-6 gap-4 overflow-x-auto">
               <button
                 type="button"
                 onClick={() => { setMode('login'); setError(null); setSuccessMsg(null); }}
-                className={`pb-2 text-xs sm:text-sm font-bold border-b-2 transition whitespace-nowrap ${
+                className={`pb-2.5 text-xs sm:text-sm font-semibold border-b-2 transition flex items-center gap-1.5 whitespace-nowrap ${
                   mode === 'login'
-                    ? 'border-turmeric-600 text-turmeric-700 dark:text-turmeric-400'
-                    : 'border-transparent text-stone-500 hover:text-stone-900 dark:hover:text-stone-300'
+                    ? 'border-terracotta text-terracotta font-bold'
+                    : 'border-transparent text-soil-muted hover:text-soil'
                 }`}
               >
-                Sign In (உள்நுழைக)
+                <LogIn className="w-4 h-4" />
+                <span>Sign In</span>
               </button>
               <button
                 type="button"
                 onClick={() => { setMode('register'); setError(null); setSuccessMsg(null); }}
-                className={`pb-2 text-xs sm:text-sm font-bold border-b-2 transition whitespace-nowrap ${
+                className={`pb-2.5 text-xs sm:text-sm font-semibold border-b-2 transition flex items-center gap-1.5 whitespace-nowrap ${
                   mode === 'register'
-                    ? 'border-turmeric-600 text-turmeric-700 dark:text-turmeric-400'
-                    : 'border-transparent text-stone-500 hover:text-stone-900 dark:hover:text-stone-300'
+                    ? 'border-terracotta text-terracotta font-bold'
+                    : 'border-transparent text-soil-muted hover:text-soil'
                 }`}
               >
-                New Staff Registration (பதிவு)
+                <UserPlus className="w-4 h-4" />
+                <span>New Registration</span>
               </button>
               <button
                 type="button"
                 onClick={() => { setMode('forgot'); setError(null); setSuccessMsg(null); }}
-                className={`pb-2 text-xs sm:text-sm font-bold border-b-2 transition whitespace-nowrap ${
+                className={`pb-2.5 text-xs sm:text-sm font-semibold border-b-2 transition flex items-center gap-1.5 whitespace-nowrap ${
                   mode === 'forgot'
-                    ? 'border-turmeric-600 text-turmeric-700 dark:text-turmeric-400'
-                    : 'border-transparent text-stone-500 hover:text-stone-900 dark:hover:text-stone-300'
+                    ? 'border-terracotta text-terracotta font-bold'
+                    : 'border-transparent text-soil-muted hover:text-soil'
                 }`}
               >
-                Forgot Password?
+                <KeyRound className="w-4 h-4" />
+                <span>Forgot Password?</span>
               </button>
             </div>
 
-            {/* Error & Success Banners */}
+            {/* Notice / Feedback Banners */}
             {error && (
-              <div className="mb-4 p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs rounded-md">
-                {error}
+              <div className="mb-4 p-3 bg-chilli/10 border border-chilli text-chilli text-xs rounded flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{error}</span>
               </div>
             )}
             {successMsg && (
-              <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs rounded-md">
-                {successMsg}
+              <div className="mb-4 p-3 bg-leaf/10 border border-leaf text-leaf text-xs rounded flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{successMsg}</span>
               </div>
             )}
 
-            {/* ===================== TAB 1: SIGN IN ===================== */}
+            {/* ===================== FORM 1: SIGN IN ===================== */}
             {mode === 'login' && (
               <form onSubmit={handleLoginSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wide mb-1">
-                    Staff Username (பயனர் பெயர்)
+                  <label className="block text-xs font-semibold text-soil uppercase tracking-wider mb-1.5">
+                    Username / பயனர் பெயர்
                   </label>
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full h-11 px-3 border border-stone-300 dark:border-stone-700 rounded-md bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-turmeric-600 text-sm"
+                    className="w-full h-11 px-3.5 bg-card border border-card-border rounded text-soil text-sm focus:outline-none focus:border-terracotta transition"
                     required
                   />
                 </div>
 
                 <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wide">
-                      Password (கடவுச்சொல்)
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="block text-xs font-semibold text-soil uppercase tracking-wider">
+                      Password / கடவுச்சொல்
                     </label>
                     <button
                       type="button"
                       onClick={() => { setMode('forgot'); setError(null); }}
-                      className="text-[11px] text-turmeric-700 dark:text-turmeric-400 hover:underline font-semibold"
+                      className="text-xs text-terracotta hover:underline font-medium"
                     >
-                      Forgot?
+                      Forgot Password?
                     </button>
                   </div>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-11 px-3 border border-stone-300 dark:border-stone-700 rounded-md bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-turmeric-600 text-sm"
+                    className="w-full h-11 px-3.5 bg-card border border-card-border rounded text-soil text-sm focus:outline-none focus:border-terracotta transition"
                     required
                   />
                 </div>
@@ -284,40 +299,41 @@ export const Login: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full h-12 bg-turmeric-600 hover:bg-turmeric-700 text-white font-bold rounded-md touch-target transition shadow-md text-sm mt-2"
+                  className="w-full h-12 bg-terracotta hover:bg-terracotta-hover text-white font-bold rounded touch-target transition shadow-xs flex items-center justify-center gap-2 text-sm mt-3"
                 >
-                  {isSubmitting ? 'Verifying Credentials...' : 'Sign In to Portal'}
+                  <span>{isSubmitting ? 'Verifying...' : 'Sign In to Portal'}</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
             )}
 
-            {/* ===================== TAB 2: NEW STAFF REGISTRATION ===================== */}
+            {/* ===================== FORM 2: NEW STAFF REGISTRATION ===================== */}
             {mode === 'register' && (
               <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 uppercase mb-1">
-                      Full Name (முழு பெயர்) *
+                    <label className="block text-xs font-semibold text-soil uppercase tracking-wider mb-1">
+                      Full Name / முழு பெயர் *
                     </label>
                     <input
                       type="text"
                       placeholder="e.g. K. Murugesan"
                       value={regFullName}
                       onChange={(e) => setRegFullName(e.target.value)}
-                      className="w-full h-10 px-3 border border-stone-300 dark:border-stone-700 rounded bg-stone-50 dark:bg-stone-800 text-sm text-stone-900 dark:text-white"
+                      className="w-full h-10 px-3 bg-card border border-card-border rounded text-sm text-soil focus:outline-none focus:border-terracotta"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 uppercase mb-1">
-                      Username (பயனர் பெயர்) *
+                    <label className="block text-xs font-semibold text-soil uppercase tracking-wider mb-1">
+                      Username / பயனர் பெயர் *
                     </label>
                     <input
                       type="text"
                       placeholder="e.g. murugesan_sales"
                       value={regUsername}
                       onChange={(e) => setRegUsername(e.target.value)}
-                      className="w-full h-10 px-3 border border-stone-300 dark:border-stone-700 rounded bg-stone-50 dark:bg-stone-800 text-sm text-stone-900 dark:text-white"
+                      className="w-full h-10 px-3 bg-card border border-card-border rounded text-sm text-soil focus:outline-none focus:border-terracotta"
                       required
                     />
                   </div>
@@ -325,44 +341,43 @@ export const Login: React.FC = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 uppercase mb-1">
-                      Password (கடவுச்சொல்) *
+                    <label className="block text-xs font-semibold text-soil uppercase tracking-wider mb-1">
+                      Password (min 4 chars) *
                     </label>
                     <input
                       type="password"
-                      placeholder="Min 4 characters"
                       value={regPassword}
                       onChange={(e) => setRegPassword(e.target.value)}
-                      className="w-full h-10 px-3 border border-stone-300 dark:border-stone-700 rounded bg-stone-50 dark:bg-stone-800 text-sm text-stone-900 dark:text-white"
+                      className="w-full h-10 px-3 bg-card border border-card-border rounded text-sm text-soil focus:outline-none focus:border-terracotta"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 uppercase mb-1">
-                      Phone Number (தொலைபேசி)
+                    <label className="block text-xs font-semibold text-soil uppercase tracking-wider mb-1">
+                      Phone Number (optional)
                     </label>
                     <input
                       type="tel"
-                      placeholder="+91 98765 43210"
+                      placeholder="+91 94431 23456"
                       value={regPhone}
                       onChange={(e) => setRegPhone(e.target.value)}
-                      className="w-full h-10 px-3 border border-stone-300 dark:border-stone-700 rounded bg-stone-50 dark:bg-stone-800 text-sm text-stone-900 dark:text-white"
+                      className="w-full h-10 px-3 bg-card border border-card-border rounded text-sm text-soil focus:outline-none focus:border-terracotta"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 uppercase mb-1">
-                    Assign Staff Operational Role (பணிப்பொறுப்பு) *
+                  <label className="block text-xs font-semibold text-soil uppercase tracking-wider mb-1">
+                    Operational Role / பணிப்பொறுப்பு *
                   </label>
                   <select
                     value={regRole}
                     onChange={(e) => setRegRole(e.target.value)}
-                    className="w-full h-10 px-3 border border-stone-300 dark:border-stone-700 rounded bg-stone-50 dark:bg-stone-800 text-sm text-stone-900 dark:text-white"
+                    className="w-full h-10 px-3 bg-card border border-card-border rounded text-sm text-soil focus:outline-none focus:border-terracotta"
                   >
-                    <option value="salesman">Salesman (Order Entry, Voice Input, Shortage Warning)</option>
+                    <option value="salesman">Salesman (Field Orders, Voice Dictation, Stock Check)</option>
                     <option value="production">Production Supervisor (BOM, Batch Execution, Variance)</option>
-                    <option value="accountant">Accountant (Read-only Audit Registers, GST Summary)</option>
+                    <option value="accountant">Accountant (Read-only Registers, GST Summary, Exports)</option>
                     <option value="admin">Factory Admin (Order Approval, GST Invoices, Dispatch)</option>
                   </select>
                 </div>
@@ -370,74 +385,75 @@ export const Login: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full h-11 bg-leaf-600 hover:bg-leaf-700 text-white font-bold rounded touch-target transition shadow-sm text-sm"
+                  className="w-full h-11 bg-leaf hover:bg-leaf-hover text-white font-bold rounded touch-target transition shadow-xs text-sm mt-2 flex items-center justify-center gap-2"
                 >
-                  {isSubmitting ? 'Registering...' : 'Register New Staff Member'}
+                  <UserPlus className="w-4 h-4" />
+                  <span>{isSubmitting ? 'Registering...' : 'Register Staff Member'}</span>
                 </button>
               </form>
             )}
 
-            {/* ===================== TAB 3: FORGOT PASSWORD ===================== */}
+            {/* ===================== FORM 3: FORGOT PASSWORD ===================== */}
             {mode === 'forgot' && (
-              <form onSubmit={handleForgotSubmit} className="space-y-4">
-                <p className="text-xs text-stone-500">
-                  Enter your registered staff username to set a new password.
+              <form onSubmit={handleForgotSubmit} className="space-y-3.5">
+                <p className="text-xs text-soil-muted">
+                  Provide your registered staff username to update your password credentials.
                 </p>
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 uppercase mb-1">
-                    Registered Username (பயனர் பெயர்) *
+                  <label className="block text-xs font-semibold text-soil uppercase tracking-wider mb-1">
+                    Registered Username / பயனர் பெயர் *
                   </label>
                   <input
                     type="text"
                     placeholder="e.g. salesman_a"
                     value={forgotUsername}
                     onChange={(e) => setForgotUsername(e.target.value)}
-                    className="w-full h-11 px-3 border border-stone-300 dark:border-stone-700 rounded bg-stone-50 dark:bg-stone-800 text-sm text-stone-900 dark:text-white"
+                    className="w-full h-10 px-3 bg-card border border-card-border rounded text-sm text-soil focus:outline-none focus:border-terracotta"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 uppercase mb-1">
-                    New Password (புதிய கடவுச்சொல்) *
+                  <label className="block text-xs font-semibold text-soil uppercase tracking-wider mb-1">
+                    New Password / புதிய கடவுச்சொல் *
                   </label>
                   <input
                     type="password"
                     placeholder="Enter new password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full h-11 px-3 border border-stone-300 dark:border-stone-700 rounded bg-stone-50 dark:bg-stone-800 text-sm text-stone-900 dark:text-white"
+                    className="w-full h-10 px-3 bg-card border border-card-border rounded text-sm text-soil focus:outline-none focus:border-terracotta"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 uppercase mb-1">
-                    Confirm New Password (கடவுச்சொல் உறுதி) *
+                  <label className="block text-xs font-semibold text-soil uppercase tracking-wider mb-1">
+                    Confirm New Password / உறுதிப்படுத்துக *
                   </label>
                   <input
                     type="password"
-                    placeholder="Re-type new password"
+                    placeholder="Re-enter new password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full h-11 px-3 border border-stone-300 dark:border-stone-700 rounded bg-stone-50 dark:bg-stone-800 text-sm text-stone-900 dark:text-white"
+                    className="w-full h-10 px-3 bg-card border border-card-border rounded text-sm text-soil focus:outline-none focus:border-terracotta"
                     required
                   />
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2.5 pt-1">
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 h-11 bg-turmeric-600 hover:bg-turmeric-700 text-white font-bold rounded touch-target transition shadow-sm text-sm"
+                    className="flex-1 h-11 bg-terracotta hover:bg-terracotta-hover text-white font-bold rounded touch-target transition shadow-xs text-sm"
                   >
-                    {isSubmitting ? 'Updating...' : 'Reset Password'}
+                    {isSubmitting ? 'Updating...' : 'Save New Password'}
                   </button>
                   <button
                     type="button"
                     onClick={() => setMode('login')}
-                    className="px-4 h-11 border border-stone-300 dark:border-stone-700 rounded text-xs font-semibold hover:bg-stone-100 dark:hover:bg-stone-800"
+                    className="px-4 h-11 border border-card-border rounded text-xs font-semibold text-soil-muted hover:text-soil hover:bg-card-subtle transition"
                   >
                     Cancel
                   </button>
@@ -446,37 +462,40 @@ export const Login: React.FC = () => {
             )}
           </div>
 
-          {/* Quick Pre-Seeded Accounts Selector (Convenient for Review) */}
-          <div className="mt-6 pt-4 border-t border-stone-200 dark:border-stone-800">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">
-                Quick Test Accounts (Click to Fill)
+          {/* Quick Pre-Seeded Test Roster (Practical for evaluation) */}
+          <div className="mt-8 pt-4 border-t border-card-border">
+            <div className="flex justify-between items-center mb-2.5">
+              <span className="text-[11px] font-mono font-bold text-soil-muted uppercase tracking-wider">
+                Pre-Seeded Roster (Click to Fill)
               </span>
-              <span className="text-[10px] text-amber-700 dark:text-amber-400 font-mono font-semibold">
-                Pre-Seeded Roster
+              <span className="text-[10px] font-mono text-soil-muted">
+                5 Roles Seeded
               </span>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-xs">
-              {quickRoles.map((r) => (
-                <button
-                  key={r.u}
-                  type="button"
-                  onClick={() => {
-                    setMode('login');
-                    setUsername(r.u);
-                    setPassword(r.p);
-                  }}
-                  className={`text-left px-2.5 py-1.5 rounded border transition flex flex-col justify-between ${
-                    username === r.u && mode === 'login'
-                      ? 'border-turmeric-600 bg-amber-50/70 dark:bg-amber-950/40 text-stone-900 dark:text-white'
-                      : 'border-stone-200 dark:border-stone-800 hover:border-turmeric-500 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300'
-                  }`}
-                >
-                  <span className="font-bold text-[11px]">{r.label}</span>
-                  <span className="text-[10px] text-stone-500 truncate">{r.role}</span>
-                </button>
-              ))}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+              {quickRoles.map((r) => {
+                const isActive = username === r.u && mode === 'login';
+                return (
+                  <button
+                    key={r.u}
+                    type="button"
+                    onClick={() => {
+                      setMode('login');
+                      setUsername(r.u);
+                      setPassword(r.p);
+                    }}
+                    className={`p-2.5 rounded border text-left transition flex flex-col justify-between ${
+                      isActive
+                        ? 'border-terracotta bg-card-subtle font-semibold text-soil'
+                        : 'border-card-border bg-card text-soil-muted hover:border-terracotta hover:text-soil'
+                    }`}
+                  >
+                    <span className="font-bold text-[11px] text-soil">{r.label}</span>
+                    <span className="text-[10px] text-soil-muted truncate mt-0.5">{r.role}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

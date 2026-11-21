@@ -3,24 +3,127 @@
 @tailwind utilities;
 
 :root {
-  --bg-primary: #FFFDF7;
-  --text-primary: #1C1917;
-  --accent-turmeric: #D97706;
-  --accent-chilli: #DC2626;
-  --accent-leaf: #15803D;
-  --table-border: #E7E5E4;
+  /* Day Mode Theme Tokens */
+  --bg-page: #FAF3E3;
+  --bg-card: #FFFBF0;
+  --bg-card-subtle: #F5EEDB;
+  --text-main: #2B1D10;
+  --text-muted: #6B5543;
+  --border-card: #E5D7BF;
+  
+  --accent-terracotta: #B5532A;
+  --accent-terracotta-hover: #96421F;
+  --success-leaf: #3F6B2F;
+  --success-leaf-hover: #325625;
+  --warning-turmeric: #D9A21B;
+  --warning-turmeric-hover: #B88714;
+  --danger-chilli: #B3261E;
+  --danger-chilli-hover: #911D17;
+
+  --grid-line-color: rgba(43, 29, 16, 0.07);
+}
+
+.dark {
+  /* Night Mode Theme Tokens */
+  --bg-page: #1A140D;
+  --bg-card: #241C13;
+  --bg-card-subtle: #2D2319;
+  --text-main: #EADFC8;
+  --text-muted: #A89882;
+  --border-card: #3D2F22;
+  
+  --accent-terracotta: #D67347;
+  --accent-terracotta-hover: #E5865C;
+  --success-leaf: #5B9445;
+  --success-leaf-hover: #6BA853;
+  --warning-turmeric: #E8B438;
+  --warning-turmeric-hover: #F2C14D;
+  --danger-chilli: #D9443B;
+  --danger-chilli-hover: #E85B53;
+
+  --grid-line-color: rgba(234, 223, 200, 0.06);
 }
 
 body {
   margin: 0;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  font-family: 'Inter', 'Mukta', 'Noto Sans Tamil', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Big touch target utility for salesman screens */
+/* Faint 32px graph-paper background grid with radial fade mask */
+.graph-paper-grid {
+  background-color: var(--bg-page);
+  background-image: 
+    linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse at 50% 30%, rgba(0, 0, 0, 1) 35%, rgba(0, 0, 0, 0.25) 85%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 30%, rgba(0, 0, 0, 1) 35%, rgba(0, 0, 0, 0.25) 85%, transparent 100%);
+}
+
+/* Solid card surfaces: tables, forms, and numbers sit on solid card surfaces with no grid or texture behind them */
+.solid-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  box-shadow: 0 1px 2px 0 rgba(43, 29, 16, 0.04);
+}
+
+/* Touch targets */
 .touch-target {
   min-height: 48px;
   min-width: 48px;
+}
+
+.touch-target-lg {
+  min-height: 56px;
+  min-width: 56px;
+}
+
+/* Headings typography */
+h1, h2, h3, .font-heading {
+  font-family: 'Fraunces', 'Noto Serif Tamil', serif;
+}
+
+/* Rubber-stamp badges */
+.rubber-stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-width: 1.5px;
+  border-style: solid;
+  border-radius: 4px;
+  line-height: 1.2;
+}
+
+.rubber-stamp-approved {
+  border-color: var(--success-leaf);
+  color: var(--success-leaf);
+  background-color: rgba(63, 107, 47, 0.08);
+}
+
+.rubber-stamp-dispatched {
+  border-color: var(--accent-terracotta);
+  color: var(--accent-terracotta);
+  background-color: rgba(181, 83, 42, 0.08);
+}
+
+.rubber-stamp-short {
+  border-color: var(--danger-chilli);
+  color: var(--danger-chilli);
+  background-color: rgba(179, 38, 30, 0.08);
+}
+
+.rubber-stamp-warning {
+  border-color: var(--warning-turmeric);
+  color: var(--text-main);
+  background-color: rgba(217, 162, 27, 0.18);
 }
