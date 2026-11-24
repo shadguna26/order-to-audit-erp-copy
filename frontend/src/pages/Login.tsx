@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
-import { LogIn, UserPlus, KeyRound, CheckCircle2, AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react';
+import { LogIn, UserPlus, KeyRound, CheckCircle2, AlertCircle, ArrowRight, ShieldCheck, Sun, Moon, Sparkles } from 'lucide-react';
 import { loginUser, registerUser, resetPassword } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { KolamDivider } from '../components/KolamDivider';
+import { TwinkleCanvas } from '../components/TwinkleCanvas';
+import { GuideHelper } from '../components/GuideHelper';
 
 type AuthMode = 'login' | 'register' | 'forgot';
 
 export const Login: React.FC = () => {
   const { login } = useAuth();
+  const { theme, toggleTheme, language, changeLanguage, animationsAndGuides, toggleAnimationsAndGuides } = useTheme();
   const [mode, setMode] = useState<AuthMode>('login');
 
   // Login form state
@@ -129,9 +133,90 @@ export const Login: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen graph-paper-grid flex items-center justify-center p-4 sm:p-8 text-soil">
+    <div className="min-h-screen graph-paper-grid relative flex flex-col justify-between p-4 sm:p-6 text-soil">
+      {/* 1) Twinkling Grid Background Canvas (Fixed, snaps to 32px grid on empty clicks) */}
+      <TwinkleCanvas />
+
+      {/* Top Utility Bar on Login Screen */}
+      <div className="relative z-20 max-w-5xl w-full mx-auto flex justify-between items-center mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-mono text-soil-muted uppercase tracking-wider font-semibold">
+            Sri Lakshmi Snacks • Tiruchirappalli
+          </span>
+        </div>
+
+        {/* Global Controls: Animations & Guides Toggle, Language Toggle, Day/Night Toggle */}
+        <div className="flex items-center gap-2 text-xs">
+          {/* Settings Toggle: Animations and guides (stored per user) */}
+          <button
+            type="button"
+            onClick={toggleAnimationsAndGuides}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded border transition font-medium ${
+              animationsAndGuides
+                ? 'solid-card border-terracotta text-terracotta font-semibold'
+                : 'solid-card text-soil-muted opacity-80 hover:opacity-100'
+            }`}
+            title="Toggle interactive grid twinkles and staff guide character"
+          >
+            <Sparkles className={`w-3.5 h-3.5 ${animationsAndGuides ? 'text-turmeric' : 'text-soil-muted'}`} />
+            <span className="hidden sm:inline">
+              {language === 'ta' ? 'வழிகாட்டிகள்' : 'Guides & Twinkles'}:
+            </span>
+            <span className="text-[10px] uppercase font-bold px-1 rounded bg-card-subtle">
+              {animationsAndGuides ? (language === 'ta' ? 'ஆன்' : 'ON') : (language === 'ta' ? 'ஆஃப்' : 'OFF')}
+            </span>
+          </button>
+
+          {/* Language Toggle */}
+          <div className="flex items-center solid-card rounded p-0.5 border border-card-border">
+            <button
+              type="button"
+              onClick={() => changeLanguage('en')}
+              className={`px-2 py-0.5 rounded text-xs font-semibold transition ${
+                language === 'en'
+                  ? 'bg-terracotta text-white font-bold'
+                  : 'text-soil-muted hover:text-soil'
+              }`}
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              onClick={() => changeLanguage('ta')}
+              className={`px-2 py-0.5 rounded text-xs font-semibold font-tamil transition ${
+                language === 'ta'
+                  ? 'bg-terracotta text-white font-bold'
+                  : 'text-soil-muted hover:text-soil'
+              }`}
+            >
+              தமிழ்
+            </button>
+          </div>
+
+          {/* Day / Night Theme Toggle */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="flex items-center gap-1 px-2.5 py-1 rounded solid-card border border-card-border text-soil hover:border-terracotta transition font-medium"
+            title="Toggle Day/Night mode"
+          >
+            {theme === 'day' ? (
+              <>
+                <Sun className="w-3.5 h-3.5 text-turmeric" />
+                <span className="hidden md:inline">Day</span>
+              </>
+            ) : (
+              <>
+                <Moon className="w-3.5 h-3.5 text-turmeric" />
+                <span className="hidden md:inline">Night</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
       {/* Main 12-Column Grid Container */}
-      <div className="w-full max-w-5xl solid-card rounded-lg overflow-hidden grid grid-cols-1 lg:grid-cols-12 border border-card-border">
+      <div className="relative z-10 w-full max-w-5xl mx-auto solid-card rounded-lg overflow-hidden grid grid-cols-1 lg:grid-cols-12 border border-card-border my-auto shadow-sm">
         
         {/* Left Column (5 of 12 cols): Hand-Crafted South Indian Factory Illustration Hero */}
         <div className="lg:col-span-5 bg-card-subtle p-6 sm:p-8 border-b lg:border-b-0 lg:border-r border-card-border flex flex-col justify-between">
@@ -177,7 +262,7 @@ export const Login: React.FC = () => {
               <span className="font-semibold text-soil">State Code: 33 (TN)</span>
             </div>
             <p className="text-[11px] leading-normal">
-              Single append-only stock ledger source of truth. All batch transactions recorded in base units with zero floating-point math.
+              Single append-only stock ledger source of truth. Click empty cream spaces to ripple four-point grid stars.
             </p>
           </div>
         </div>
@@ -266,6 +351,7 @@ export const Login: React.FC = () => {
                     Username / பயனர் பெயர்
                   </label>
                   <input
+                    id="login-username-input"
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -288,6 +374,7 @@ export const Login: React.FC = () => {
                     </button>
                   </div>
                   <input
+                    id="login-password-input"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -297,6 +384,7 @@ export const Login: React.FC = () => {
                 </div>
 
                 <button
+                  id="login-submit-btn"
                   type="submit"
                   disabled={isSubmitting}
                   className="w-full h-12 bg-terracotta hover:bg-terracotta-hover text-white font-bold rounded touch-target transition shadow-xs flex items-center justify-center gap-2 text-sm mt-3"
@@ -463,7 +551,7 @@ export const Login: React.FC = () => {
           </div>
 
           {/* Quick Pre-Seeded Test Roster (Practical for evaluation) */}
-          <div className="mt-8 pt-4 border-t border-card-border">
+          <div id="quick-roster-section" className="mt-8 pt-4 border-t border-card-border">
             <div className="flex justify-between items-center mb-2.5">
               <span className="text-[11px] font-mono font-bold text-soil-muted uppercase tracking-wider">
                 Pre-Seeded Roster (Click to Fill)
@@ -500,6 +588,31 @@ export const Login: React.FC = () => {
           </div>
         </div>
 
+      </div>
+
+      {/* 2) Guide Character: Shopkeeper Assistant welcoming staff or pointing to roster/errors */}
+      <div className="relative z-30 max-w-5xl w-full mx-auto mt-3">
+        {error ? (
+          <GuideHelper
+            targetSelector="#login-username-input"
+            character="shopkeeper"
+            screenKey="login_error"
+            forceShow={true}
+            side="right"
+            messageEn="Please verify your staff username and password, or click one of the quick test accounts above to sign in."
+            messageTa="தயவுசெய்து உங்கள் பயனர் பெயர் மற்றும் கடவுச்சொல்லை சரிபார்க்கவும் அல்லது மேலே உள்ள மாதிரி கணக்கை கிளிக் செய்யவும்."
+          />
+        ) : (
+          <GuideHelper
+            targetSelector="#quick-roster-section"
+            character="shopkeeper"
+            screenKey="login_welcome"
+            idleTimeoutSeconds={6}
+            side="left"
+            messageEn="Welcome to Sri Lakshmi Snacks! Pick any test account above for instant one-click login, or enter your credentials."
+            messageTa="ஸ்ரீ லக்ஷ்மி ஸ்நாக்ஸ்-க்கு நல்வரவு! மாதிரி உள்நுழைவுக்கு மேலே உள்ள கணக்கை கிளிக் செய்யவும் அல்லது உங்கள் விவரங்களை உள்ளிடவும்."
+          />
+        )}
       </div>
     </div>
   );

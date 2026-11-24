@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sun, Moon, LogOut, Building2 } from 'lucide-react';
+import { Sun, Moon, LogOut, Building2, Sparkles } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import { useTheme } from './context/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -15,7 +15,7 @@ type TabKey = 'salesman' | 'admin' | 'production' | 'accountant' | 'owner';
 
 export const App: React.FC = () => {
   const { user, token, logout, isLoading } = useAuth();
-  const { theme, toggleTheme, language, changeLanguage } = useTheme();
+  const { theme, toggleTheme, language, changeLanguage, animationsAndGuides, toggleAnimationsAndGuides, setActiveUsername } = useTheme();
   const { t } = useTranslation();
 
   const [activeTab, setActiveTab] = useState<TabKey>('salesman');
@@ -25,8 +25,11 @@ export const App: React.FC = () => {
     itemId: 1
   });
 
-  // Set default tab on login based on user role
+  // Set active username for per-user preferences and set default tab based on user role
   useEffect(() => {
+    if (user?.username) {
+      setActiveUsername(user.username);
+    }
     if (user?.role) {
       if (user.role === 'salesman') setActiveTab('salesman');
       else if (user.role === 'production') setActiveTab('production');
@@ -34,7 +37,7 @@ export const App: React.FC = () => {
       else if (user.role === 'admin') setActiveTab('admin');
       else if (user.role === 'owner') setActiveTab('owner');
     }
-  }, [user?.role]);
+  }, [user?.role, user?.username, setActiveUsername]);
 
   if (isLoading) {
     return (
@@ -92,7 +95,25 @@ export const App: React.FC = () => {
         </div>
 
         {/* Global Controls & User Info */}
-        <div className="flex items-center gap-3 text-xs">
+        <div className="flex items-center gap-2.5 text-xs">
+          {/* Animations & Guides Toggle (Per user stored) */}
+          <button
+            type="button"
+            onClick={toggleAnimationsAndGuides}
+            className={`flex items-center gap-1 px-2 py-1 rounded border text-xs font-semibold transition ${
+              animationsAndGuides
+                ? 'bg-black/25 border-amber-300 text-amber-200'
+                : 'bg-black/10 border-white/20 text-white/60 hover:text-white'
+            }`}
+            title="Toggle Animations and Guides (Stored per user)"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Guides</span>
+            <span className="text-[10px] uppercase font-bold px-1 py-0.2 rounded bg-black/30">
+              {animationsAndGuides ? 'ON' : 'OFF'}
+            </span>
+          </button>
+
           {/* Language Toggle */}
           <div className="flex items-center bg-black/20 rounded p-0.5 border border-white/20">
             <button

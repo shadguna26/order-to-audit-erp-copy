@@ -21,6 +21,7 @@
   --danger-chilli-hover: #911D17;
 
   --grid-line-color: rgba(43, 29, 16, 0.07);
+  --twinkle: #D9A21B; /* Turmeric twinkle in day mode */
 }
 
 .dark {
@@ -42,6 +43,7 @@
   --danger-chilli-hover: #E85B53;
 
   --grid-line-color: rgba(234, 223, 200, 0.06);
+  --twinkle: #F2C14D; /* Soft gold twinkle in night mode */
 }
 
 body {
@@ -61,6 +63,7 @@ body {
     linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
     linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
   background-size: 32px 32px;
+  background-attachment: fixed;
   mask-image: radial-gradient(ellipse at 50% 30%, rgba(0, 0, 0, 1) 35%, rgba(0, 0, 0, 0.25) 85%, transparent 100%);
   -webkit-mask-image: radial-gradient(ellipse at 50% 30%, rgba(0, 0, 0, 1) 35%, rgba(0, 0, 0, 0.25) 85%, transparent 100%);
 }
@@ -126,4 +129,51 @@ h1, h2, h3, .font-heading {
   border-color: var(--warning-turmeric);
   color: var(--text-main);
   background-color: rgba(217, 162, 27, 0.18);
+}
+
+/* Guide Character Pointing Arm CSS Animation */
+@keyframes arm-point {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-6deg) translateY(-2px);
+  }
+}
+
+.guide-arm-animated {
+  transform-origin: 22px 36px;
+  animation: arm-point 1.8s ease-in-out infinite;
+}
+
+/* Soft pulsing dotted ring around the guide target element */
+@keyframes guide-pulse-ring {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(181, 83, 42, 0.45);
+    outline: 2px dashed var(--accent-terracotta);
+    outline-offset: 4px;
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(181, 83, 42, 0.15);
+    outline: 2px dashed var(--accent-terracotta);
+    outline-offset: 6px;
+  }
+}
+
+.guide-target-highlight {
+  animation: guide-pulse-ring 2s ease-in-out infinite !important;
+  position: relative;
+  z-index: 20;
+}
+
+/* Respect prefers-reduced-motion everywhere */
+@media (prefers-reduced-motion: reduce) {
+  .guide-arm-animated {
+    animation: none !important;
+  }
+  .guide-target-highlight {
+    animation: none !important;
+    outline: 2px dashed var(--accent-terracotta) !important;
+    outline-offset: 4px !important;
+  }
 }
