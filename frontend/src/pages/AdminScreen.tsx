@@ -97,7 +97,7 @@ export const AdminScreen: React.FC<{ token: string; user: any; onSelectStock: (t
   };
 
   return (
-    <div className="space-y-6">
+    <div data-no-fx="true" className="space-y-6">
       {msg && (
         <div className={`p-3 rounded text-xs ${msg.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' : 'bg-rose-50 text-rose-800 border border-rose-300'}`}>
           {msg.text}

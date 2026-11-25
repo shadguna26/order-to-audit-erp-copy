@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sun, Moon, LogOut, Building2, Sparkles } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import { useTheme } from './context/ThemeContext';
@@ -10,12 +10,22 @@ import { ProductionScreen } from './pages/ProductionScreen';
 import { AccountantScreen } from './pages/AccountantScreen';
 import { OwnerScreen } from './pages/OwnerScreen';
 import { StockLedgerModal } from './components/StockLedgerModal';
+import { initGridFx } from './effects/gridFx';
 
 type TabKey = 'salesman' | 'admin' | 'production' | 'accountant' | 'owner';
 
 export const App: React.FC = () => {
   const { user, token, logout, isLoading } = useAuth();
-  const { theme, toggleTheme, language, changeLanguage, animationsAndGuides, toggleAnimationsAndGuides, setActiveUsername } = useTheme();
+  const {
+    theme,
+    toggleTheme,
+    language,
+    changeLanguage,
+    animationsAndGuides,
+    toggleAnimationsAndGuides,
+    prefersReducedMotion,
+    setActiveUsername
+  } = useTheme();
   const { t } = useTranslation();
 
   const [activeTab, setActiveTab] = useState<TabKey>('salesman');
@@ -24,6 +34,30 @@ export const App: React.FC = () => {
     itemType: 'finished_goods',
     itemId: 1
   });
+
+  const fxCanvasRef = useRef<HTMLCanvasElement>(null);
+  const gridFxRef = useRef<any>(null);
+
+  // Mount Grid FX once at app root
+  useEffect(() => {
+    if (fxCanvasRef.current) {
+      gridFxRef.current = initGridFx(fxCanvasRef.current, {
+        isEnabled: () => animationsAndGuides && !prefersReducedMotion
+      });
+    }
+    return () => {
+      if (gridFxRef.current) {
+        gridFxRef.current.destroy();
+      }
+    };
+  }, [animationsAndGuides, prefersReducedMotion]);
+
+  // Update theme colors when day/night mode toggles
+  useEffect(() => {
+    if (gridFxRef.current) {
+      gridFxRef.current.updateTheme();
+    }
+  }, [theme]);
 
   // Set active username for per-user preferences and set default tab based on user role
   useEffect(() => {
@@ -47,10 +81,6 @@ export const App: React.FC = () => {
     );
   }
 
-  if (!user || !token) {
-    return <Login />;
-  }
-
   const handleOpenStockLedger = (itemType: string, itemId: number) => {
     setStockModal({
       isOpen: true,
@@ -60,7 +90,7 @@ export const App: React.FC = () => {
   };
 
   // Determine authorized tabs based on user role
-  const isSuperUser = user.role === 'admin' || user.role === 'owner';
+  const isSuperUser = user?.role === 'admin' || user?.role === 'owner';
   const availableTabs: { key: TabKey; label: string; roleFilter: string[] }[] = [
     { key: 'salesman', label: language === 'ta' ? 'விற்பனை ஆர்டர்' : 'Salesman Order', roleFilter: ['salesman', 'admin', 'owner'] },
     { key: 'admin', label: language === 'ta' ? 'தொழிற்சாலை நிர்வாகம்' : 'Factory Admin', roleFilter: ['admin', 'owner'] },
@@ -69,167 +99,179 @@ export const App: React.FC = () => {
     { key: 'owner', label: language === 'ta' ? 'உரிமையாளர் முகப்பு' : 'Owner Dashboard', roleFilter: ['owner', 'admin'] }
   ];
 
-  const visibleTabs = availableTabs.filter(tab => isSuperUser || tab.roleFilter.includes(user.role));
+  const visibleTabs = availableTabs.filter(tab => !user || isSuperUser || tab.roleFilter.includes(user.role));
 
   return (
-    <div className="min-h-screen flex flex-col bg-page graph-paper-grid text-soil transition-colors font-body">
-      {/* Terracotta Top Application Header */}
-      <header className="bg-terracotta text-white px-4 sm:px-6 py-2.5 flex flex-wrap justify-between items-center gap-3 shadow-xs">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0">
-            <Building2 className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] uppercase font-bold tracking-wider text-amber-200">
-                {t('brand')} • Tiruchirappalli
-              </span>
-              <span className="text-[10px] bg-black/20 text-white font-mono px-1.5 py-0.2 rounded border border-white/20">
-                TN-33
-              </span>
-            </div>
-            <h1 className="text-base sm:text-lg font-heading font-bold text-white leading-tight">
-              Order-to-Audit ERP
-            </h1>
-          </div>
-        </div>
+    <>
+      {/* 1. Fixed #fx-canvas mounted once in app root behind all content */}
+      <canvas id="fx-canvas" ref={fxCanvasRef} />
 
-        {/* Global Controls & User Info */}
-        <div className="flex items-center gap-2.5 text-xs">
-          {/* Animations & Guides Toggle (Per user stored) */}
-          <button
-            type="button"
-            onClick={toggleAnimationsAndGuides}
-            className={`flex items-center gap-1 px-2 py-1 rounded border text-xs font-semibold transition ${
-              animationsAndGuides
-                ? 'bg-black/25 border-amber-300 text-amber-200'
-                : 'bg-black/10 border-white/20 text-white/60 hover:text-white'
-            }`}
-            title="Toggle Animations and Guides (Stored per user)"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Guides</span>
-            <span className="text-[10px] uppercase font-bold px-1 py-0.2 rounded bg-black/30">
-              {animationsAndGuides ? 'ON' : 'OFF'}
-            </span>
-          </button>
+      {/* 2. Content wrapper with position: relative and z-index: 1 */}
+      <div className="app-content-wrapper min-h-screen flex flex-col bg-page text-soil transition-colors font-body">
+        {!user || !token ? (
+          <Login />
+        ) : (
+          <>
+            {/* Terracotta Top Application Header */}
+            <header className="bg-terracotta text-white px-4 sm:px-6 py-2.5 flex flex-wrap justify-between items-center gap-3 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0">
+                  <Building2 className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] uppercase font-bold tracking-wider text-amber-200">
+                      {t('brand')} • Tiruchirappalli
+                    </span>
+                    <span className="text-[10px] bg-black/20 text-white font-mono px-1.5 py-0.2 rounded border border-white/20">
+                      TN-33
+                    </span>
+                  </div>
+                  <h1 className="text-base sm:text-lg font-heading font-bold text-white leading-tight">
+                    Order-to-Audit ERP
+                  </h1>
+                </div>
+              </div>
 
-          {/* Language Toggle */}
-          <div className="flex items-center bg-black/20 rounded p-0.5 border border-white/20">
-            <button
-              type="button"
-              onClick={() => changeLanguage('en')}
-              className={`px-2 py-0.5 rounded text-xs font-semibold transition ${
-                language === 'en'
-                  ? 'bg-white text-terracotta font-bold'
-                  : 'text-white/80 hover:text-white'
-              }`}
-            >
-              EN
-            </button>
-            <button
-              type="button"
-              onClick={() => changeLanguage('ta')}
-              className={`px-2 py-0.5 rounded text-xs font-semibold font-tamil transition ${
-                language === 'ta'
-                  ? 'bg-white text-terracotta font-bold'
-                  : 'text-white/80 hover:text-white'
-              }`}
-            >
-              தமிழ்
-            </button>
-          </div>
+              {/* Global Controls & User Info */}
+              <div className="flex items-center gap-2.5 text-xs">
+                {/* Animations & Guides Toggle (Per user stored) */}
+                <button
+                  type="button"
+                  onClick={toggleAnimationsAndGuides}
+                  className={`flex items-center gap-1 px-2 py-1 rounded border text-xs font-semibold transition ${
+                    animationsAndGuides
+                      ? 'bg-black/25 border-amber-300 text-amber-200'
+                      : 'bg-black/10 border-white/20 text-white/60 hover:text-white'
+                  }`}
+                  title="Toggle Animations and Guides (Stored per user)"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Guides</span>
+                  <span className="text-[10px] uppercase font-bold px-1 py-0.2 rounded bg-black/30">
+                    {animationsAndGuides ? 'ON' : 'OFF'}
+                  </span>
+                </button>
 
-          {/* Day / Night Theme Toggle */}
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-black/20 border border-white/20 text-white hover:bg-black/30 transition text-xs font-medium"
-            title="Toggle Day/Night mode"
-          >
-            {theme === 'day' ? (
-              <>
-                <Sun className="w-3.5 h-3.5 text-amber-200" />
-                <span className="hidden sm:inline">Day</span>
-              </>
-            ) : (
-              <>
-                <Moon className="w-3.5 h-3.5 text-amber-200" />
-                <span className="hidden sm:inline">Night</span>
-              </>
-            )}
-          </button>
+                {/* Language Toggle */}
+                <div className="flex items-center bg-black/20 rounded p-0.5 border border-white/20">
+                  <button
+                    type="button"
+                    onClick={() => changeLanguage('en')}
+                    className={`px-2 py-0.5 rounded text-xs font-semibold transition ${
+                      language === 'en'
+                        ? 'bg-white text-terracotta font-bold'
+                        : 'text-white/80 hover:text-white'
+                    }`}
+                  >
+                    EN
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => changeLanguage('ta')}
+                    className={`px-2 py-0.5 rounded text-xs font-semibold font-tamil transition ${
+                      language === 'ta'
+                        ? 'bg-white text-terracotta font-bold'
+                        : 'text-white/80 hover:text-white'
+                    }`}
+                  >
+                    தமிழ்
+                  </button>
+                </div>
 
-          {/* User profile & Role Badge */}
-          <div className="text-right pl-2 border-l border-white/20 hidden sm:block">
-            <div className="font-semibold text-white">{user.full_name}</div>
-            <div className="text-[10px] font-mono uppercase text-amber-200">
-              Role: <span className="font-bold">{user.role}</span>
-            </div>
-          </div>
+                {/* Day / Night Theme Toggle */}
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-black/20 border border-white/20 text-white hover:bg-black/30 transition text-xs font-medium"
+                  title="Toggle Day/Night mode"
+                >
+                  {theme === 'day' ? (
+                    <>
+                      <Sun className="w-3.5 h-3.5 text-amber-200" />
+                      <span className="hidden sm:inline">Day</span>
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="w-3.5 h-3.5 text-amber-200" />
+                      <span className="hidden sm:inline">Night</span>
+                    </>
+                  )}
+                </button>
 
-          {/* Sign Out Button */}
-          <button
-            type="button"
-            onClick={logout}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs border border-white/30 hover:bg-white hover:text-terracotta rounded text-white transition-colors font-semibold"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{t('nav.sign_out')}</span>
-          </button>
-        </div>
-      </header>
+                {/* User profile & Role Badge */}
+                <div className="text-right pl-2 border-l border-white/20 hidden sm:block">
+                  <div className="font-semibold text-white">{user.full_name}</div>
+                  <div className="text-[10px] font-mono uppercase text-amber-200">
+                    Role: <span className="font-bold">{user.role}</span>
+                  </div>
+                </div>
 
-      {/* Role Navigation Bar */}
-      <nav className="bg-card solid-card border-x-0 border-t-0 px-4 sm:px-6 py-1.5">
-        <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto">
-          {visibleTabs.map((tab) => {
-            const isActive = activeTab === tab.key;
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setActiveTab(tab.key)}
-                className={`px-3.5 py-1.5 text-xs font-bold rounded transition whitespace-nowrap ${
-                  isActive
-                    ? 'bg-terracotta text-white shadow-xs'
-                    : 'text-soil-muted hover:text-soil hover:bg-card-subtle'
-                }`}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-      </nav>
+                {/* Sign Out Button */}
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="flex items-center gap-1 px-2.5 py-1 text-xs border border-white/30 hover:bg-white hover:text-terracotta rounded text-white transition-colors font-semibold"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{t('nav.sign_out')}</span>
+                </button>
+              </div>
+            </header>
 
-      {/* Main Screen Content */}
-      <main className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto">
-        {activeTab === 'salesman' && (
-          <SalesmanScreen token={token} user={user} onSelectStock={handleOpenStockLedger} />
+            {/* Role Navigation Bar */}
+            <nav className="bg-card solid-card border-x-0 border-t-0 px-4 sm:px-6 py-1.5">
+              <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto">
+                {visibleTabs.map((tab) => {
+                  const isActive = activeTab === tab.key;
+                  return (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      onClick={() => setActiveTab(tab.key)}
+                      className={`px-3.5 py-1.5 text-xs font-bold rounded transition whitespace-nowrap ${
+                        isActive
+                          ? 'bg-terracotta text-white shadow-xs'
+                          : 'text-soil-muted hover:text-soil hover:bg-card-subtle'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </nav>
+
+            {/* Main Screen Content */}
+            <main className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto">
+              {activeTab === 'salesman' && (
+                <SalesmanScreen token={token} user={user} onSelectStock={handleOpenStockLedger} />
+              )}
+              {activeTab === 'admin' && (
+                <AdminScreen token={token} user={user} onSelectStock={handleOpenStockLedger} />
+              )}
+              {activeTab === 'production' && (
+                <ProductionScreen token={token} user={user} onSelectStock={handleOpenStockLedger} />
+              )}
+              {activeTab === 'accountant' && (
+                <AccountantScreen token={token} user={user} onSelectStock={handleOpenStockLedger} />
+              )}
+              {activeTab === 'owner' && (
+                <OwnerScreen token={token} user={user} onSelectStock={handleOpenStockLedger} />
+              )}
+            </main>
+
+            {/* Drill-down Stock Ledger Modal */}
+            <StockLedgerModal
+              isOpen={stockModal.isOpen}
+              onClose={() => setStockModal((prev) => ({ ...prev, isOpen: false }))}
+              itemType={stockModal.itemType}
+              itemId={stockModal.itemId}
+              token={token}
+            />
+          </>
         )}
-        {activeTab === 'admin' && (
-          <AdminScreen token={token} user={user} onSelectStock={handleOpenStockLedger} />
-        )}
-        {activeTab === 'production' && (
-          <ProductionScreen token={token} user={user} onSelectStock={handleOpenStockLedger} />
-        )}
-        {activeTab === 'accountant' && (
-          <AccountantScreen token={token} user={user} onSelectStock={handleOpenStockLedger} />
-        )}
-        {activeTab === 'owner' && (
-          <OwnerScreen token={token} user={user} onSelectStock={handleOpenStockLedger} />
-        )}
-      </main>
-
-      {/* Drill-down Stock Ledger Modal */}
-      <StockLedgerModal
-        isOpen={stockModal.isOpen}
-        onClose={() => setStockModal((prev) => ({ ...prev, isOpen: false }))}
-        itemType={stockModal.itemType}
-        itemId={stockModal.itemId}
-        token={token}
-      />
-    </div>
+      </div>
+    </>
   );
 };

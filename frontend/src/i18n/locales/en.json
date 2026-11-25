@@ -74,5 +74,21 @@
     "status": "Status",
     "actions": "Actions",
     "offline_notice": "Offline mode active. Orders will sync automatically when network returns."
+  },
+  "guide": {
+    "got_it": "Got it",
+    "skip": "Skip",
+    "shopkeeper_title": "Kirana Shopkeeper Guide",
+    "salesman_title": "Field Sales Guide",
+    "worker_title": "Production Master Guide",
+    "login_role_or_username": "Select a quick demo staff account or enter your username to enter the ERP portal.",
+    "salesman_customer": "Select the retail shop or distributor placing the order.",
+    "salesman_product": "Select the fresh snack varieties and check live stock balances.",
+    "salesman_stepper": "Adjust packet quantities using quick +10/-10 buttons or type directly.",
+    "salesman_voice": "Tap the mic and speak in Tamil or English to book an order instantly.",
+    "salesman_submit": "Review total packets and submit to send dispatch order to Tiruchi factory.",
+    "prod_issue": "Verify actual raw material consumption (flour, oil, pouches) for this batch.",
+    "prod_output": "Enter actual good snack packets produced and damaged pouches.",
+    "prod_save": "Save and post this production run to calculate batch variance and cost per packet."
   }
 }

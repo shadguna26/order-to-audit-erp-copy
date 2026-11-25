@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { startSpeechRecognition, ParsedVoiceOrder } from '../utils/speech';
 import { queueOfflineOrder, syncOfflineOrders, getQueuedOrders } from '../utils/offlineQueue';
+import { GuideHelper } from '../components/GuideHelper.jsx';
 
 export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock: (type: string, id: number) => void }> = ({ token, user, onSelectStock }) => {
   const { t, i18n } = useTranslation();
@@ -18,6 +19,48 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [offlineCount, setOfflineCount] = useState(0);
   const [msg, setMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [activeGuideStep, setActiveGuideStep] = useState<'customer' | 'product' | 'stepper' | 'voice' | 'submit'>('customer');
+
+  const getGuideProps = () => {
+    switch (activeGuideStep) {
+      case 'customer':
+        return {
+          target: '[data-guide="salesman-customer"]',
+          messageKey: 'guide.salesman_customer',
+          guideKey: 'salesman_flow_customer',
+          onGotIt: () => setActiveGuideStep('product')
+        };
+      case 'product':
+        return {
+          target: '[data-guide="salesman-product"]',
+          messageKey: 'guide.salesman_product',
+          guideKey: 'salesman_flow_product',
+          onGotIt: () => setActiveGuideStep('stepper')
+        };
+      case 'stepper':
+        return {
+          target: '[data-guide="salesman-stepper"]',
+          messageKey: 'guide.salesman_stepper',
+          guideKey: 'salesman_flow_stepper',
+          onGotIt: () => setActiveGuideStep('voice')
+        };
+      case 'voice':
+        return {
+          target: '[data-guide="salesman-voice"]',
+          messageKey: 'guide.salesman_voice',
+          guideKey: 'salesman_flow_voice',
+          onGotIt: () => setActiveGuideStep('submit')
+        };
+      case 'submit':
+      default:
+        return {
+          target: '[data-guide="salesman-submit"]',
+          messageKey: 'guide.salesman_submit',
+          guideKey: 'salesman_flow_submit',
+          onGotIt: () => {}
+        };
+    }
+  };
 
   useEffect(() => {
     loadMasterData();
@@ -197,6 +240,7 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
           </h2>
           <button
             type="button"
+            data-guide="salesman-voice"
             onClick={handleVoiceStart}
             className={`min-h-[48px] px-4 rounded font-bold text-xs flex items-center gap-2 transition-all ${
               isListening ? 'bg-chilli-600 text-white animate-pulse' : 'bg-turmeric-100 text-turmeric-800 border border-turmeric-500 hover:bg-turmeric-200'
@@ -209,13 +253,16 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
 
         <form onSubmit={handleOrderSubmit} className="space-y-4">
           {/* Customer Selection */}
-          <div>
+          <div data-guide="salesman-customer">
             <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
               {t('salesman.select_customer')}
             </label>
             <select
               value={selectedCustomerId}
-              onChange={(e) => setSelectedCustomerId(Number(e.target.value))}
+              onChange={(e) => {
+                setSelectedCustomerId(Number(e.target.value));
+                setActiveGuideStep('product');
+              }}
               className="w-full min-h-[48px] px-3 bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded text-stone-900 dark:text-white text-sm"
             >
               {customers.map((c) => (
@@ -227,7 +274,7 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
           </div>
 
           {/* Product Selection */}
-          <div>
+          <div data-guide="salesman-product">
             <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
               {t('salesman.add_products')}
             </label>
@@ -238,7 +285,10 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
                   <button
                     key={p.id}
                     type="button"
-                    onClick={() => setSelectedProductId(p.id)}
+                    onClick={() => {
+                      setSelectedProductId(p.id);
+                      setActiveGuideStep('stepper');
+                    }}
                     className={`p-2.5 rounded-lg border text-left transition flex flex-col justify-between ${
                       isSelected
                         ? 'border-turmeric-600 bg-amber-50 dark:bg-amber-950/40 shadow-xs'
@@ -253,7 +303,10 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
             </div>
             <select
               value={selectedProductId}
-              onChange={(e) => setSelectedProductId(Number(e.target.value))}
+              onChange={(e) => {
+                setSelectedProductId(Number(e.target.value));
+                setActiveGuideStep('stepper');
+              }}
               className="w-full min-h-[44px] px-3 bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded text-stone-900 dark:text-white text-xs"
             >
               {products.map((p) => (
@@ -265,7 +318,7 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
           </div>
 
           {/* Quantity Selector with Big Buttons */}
-          <div>
+          <div data-guide="salesman-stepper">
             <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
               {t('common.quantity')} ({t('salesman.packets')})
             </label>
@@ -307,6 +360,7 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
 
           <button
             type="submit"
+            data-guide="salesman-submit"
             className="w-full min-h-[52px] bg-turmeric-600 hover:bg-turmeric-700 text-white font-bold rounded text-base transition-colors shadow-sm"
           >
             {t('salesman.submit_order')}
@@ -394,6 +448,18 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
           )}
         </div>
       </div>
+
+      {/* Human Guide: Salesman Assistant guiding the order entry flow */}
+      <GuideHelper
+        target={getGuideProps().target}
+        role="salesman"
+        guideKey={getGuideProps().guideKey}
+        messageKey={getGuideProps().messageKey}
+        side="top"
+        idleSeconds={6}
+        hasError={Boolean(msg && msg.type === 'error')}
+        onGotIt={getGuideProps().onGotIt}
+      />
     </div>
   );
 };

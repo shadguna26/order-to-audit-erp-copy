@@ -26,7 +26,7 @@ export const AccountantScreen: React.FC<{ token: string; user: any; onSelectStoc
   };
 
   return (
-    <div className="space-y-5">
+    <div data-no-fx="true" className="space-y-5">
       <div className="flex justify-between items-center bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 p-4 rounded">
         <div>
           <h2 className="text-base font-bold text-stone-900 dark:text-white">{t('accountant.title')}</h2>

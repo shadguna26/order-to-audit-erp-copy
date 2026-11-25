@@ -4,8 +4,7 @@ import { loginUser, registerUser, resetPassword } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { KolamDivider } from '../components/KolamDivider';
-import { TwinkleCanvas } from '../components/TwinkleCanvas';
-import { GuideHelper } from '../components/GuideHelper';
+import { GuideHelper } from '../components/GuideHelper.jsx';
 
 type AuthMode = 'login' | 'register' | 'forgot';
 
@@ -133,10 +132,7 @@ export const Login: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen graph-paper-grid relative flex flex-col justify-between p-4 sm:p-6 text-soil">
-      {/* 1) Twinkling Grid Background Canvas (Fixed, snaps to 32px grid on empty clicks) */}
-      <TwinkleCanvas />
-
+    <div className="min-h-screen relative flex flex-col justify-between p-4 sm:p-6 text-soil">
       {/* Top Utility Bar on Login Screen */}
       <div className="relative z-20 max-w-5xl w-full mx-auto flex justify-between items-center mb-3">
         <div className="flex items-center gap-2">
@@ -352,6 +348,7 @@ export const Login: React.FC = () => {
                   </label>
                   <input
                     id="login-username-input"
+                    data-guide="login-username"
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -590,30 +587,16 @@ export const Login: React.FC = () => {
 
       </div>
 
-      {/* 2) Guide Character: Shopkeeper Assistant welcoming staff or pointing to roster/errors */}
-      <div className="relative z-30 max-w-5xl w-full mx-auto mt-3">
-        {error ? (
-          <GuideHelper
-            targetSelector="#login-username-input"
-            character="shopkeeper"
-            screenKey="login_error"
-            forceShow={true}
-            side="right"
-            messageEn="Please verify your staff username and password, or click one of the quick test accounts above to sign in."
-            messageTa="தயவுசெய்து உங்கள் பயனர் பெயர் மற்றும் கடவுச்சொல்லை சரிபார்க்கவும் அல்லது மேலே உள்ள மாதிரி கணக்கை கிளிக் செய்யவும்."
-          />
-        ) : (
-          <GuideHelper
-            targetSelector="#quick-roster-section"
-            character="shopkeeper"
-            screenKey="login_welcome"
-            idleTimeoutSeconds={6}
-            side="left"
-            messageEn="Welcome to Sri Lakshmi Snacks! Pick any test account above for instant one-click login, or enter your credentials."
-            messageTa="ஸ்ரீ லக்ஷ்மி ஸ்நாக்ஸ்-க்கு நல்வரவு! மாதிரி உள்நுழைவுக்கு மேலே உள்ள கணக்கை கிளிக் செய்யவும் அல்லது உங்கள் விவரங்களை உள்ளிடவும்."
-          />
-        )}
-      </div>
+      {/* 2) Guide Character: Shopkeeper Assistant welcoming staff or pointing to username/errors */}
+      <GuideHelper
+        target='[data-guide="login-username"]'
+        role="shopkeeper"
+        guideKey="login_username"
+        messageKey="guide.login_role_or_username"
+        hasError={Boolean(error)}
+        side="top"
+        idleSeconds={6}
+      />
     </div>
   );
 };

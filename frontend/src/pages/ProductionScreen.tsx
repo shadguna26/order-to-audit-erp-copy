@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { GuideHelper } from '../components/GuideHelper.jsx';
 
 export const ProductionScreen: React.FC<{ token: string; user: any; onSelectStock: (type: string, id: number) => void }> = ({ token, user, onSelectStock }) => {
   const { t } = useTranslation();
@@ -13,6 +14,7 @@ export const ProductionScreen: React.FC<{ token: string; user: any; onSelectStoc
   const [issuedFlour, setIssuedFlour] = useState<number>(40000); // 40 kg
 
   const [msg, setMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [prodStep, setProdStep] = useState<'output' | 'issue' | 'save'>('output');
 
   useEffect(() => {
     loadPlanning();
@@ -123,12 +125,15 @@ export const ProductionScreen: React.FC<{ token: string; user: any; onSelectStoc
 
         <form onSubmit={handleSaveRun} className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
+            <div data-guide="prod-output">
               <label className="block text-xs font-semibold mb-1">{t('production.actual_good_output')}</label>
               <input
                 type="number"
                 value={actualGood}
-                onChange={(e) => setActualGood(Number(e.target.value))}
+                onChange={(e) => {
+                  setActualGood(Number(e.target.value));
+                  setProdStep('issue');
+                }}
                 className="w-full min-h-[44px] px-3 border border-stone-300 rounded text-sm bg-white dark:bg-stone-800"
                 required
               />
@@ -155,7 +160,7 @@ export const ProductionScreen: React.FC<{ token: string; user: any; onSelectStoc
             </div>
           </div>
 
-          <div className="border border-stone-200 dark:border-stone-800 rounded p-4 bg-stone-50 dark:bg-stone-800/40">
+          <div data-guide="prod-issue" className="border border-stone-200 dark:border-stone-800 rounded p-4 bg-stone-50 dark:bg-stone-800/40">
             <h4 className="text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-3">
               Actual Issued Quantities
             </h4>
@@ -186,12 +191,40 @@ export const ProductionScreen: React.FC<{ token: string; user: any; onSelectStoc
 
           <button
             type="submit"
+            data-guide="prod-save"
             className="w-full min-h-[48px] bg-turmeric-600 hover:bg-turmeric-700 text-white font-bold rounded text-sm shadow-sm"
           >
             {t('production.save_run')}
           </button>
         </form>
       </div>
+
+      {/* Human Guide: Factory Production Master */}
+      <GuideHelper
+        target={
+          prodStep === 'output'
+            ? '[data-guide="prod-output"]'
+            : prodStep === 'issue'
+            ? '[data-guide="prod-issue"]'
+            : '[data-guide="prod-save"]'
+        }
+        role="worker"
+        guideKey={`prod_flow_${prodStep}`}
+        messageKey={
+          prodStep === 'output'
+            ? 'guide.prod_output'
+            : prodStep === 'issue'
+            ? 'guide.prod_issue'
+            : 'guide.prod_save'
+        }
+        side="top"
+        idleSeconds={6}
+        hasError={Boolean(msg && msg.type === 'error')}
+        onGotIt={() => {
+          if (prodStep === 'output') setProdStep('issue');
+          else if (prodStep === 'issue') setProdStep('save');
+        }}
+      />
     </div>
   );
 };
