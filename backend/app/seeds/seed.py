@@ -22,8 +22,6 @@ from app.models.stock import (
     StockDocType,
     StockLedger
 )
-from app.services.auth_service import get_password_hash
-
 def seed_database(db: Session):
     print("=== Starting Seed: Sri Lakshmi Snacks (Tiruchirappalli) ===")
 
@@ -31,34 +29,33 @@ def seed_database(db: Session):
     bind_engine = db.get_bind()
     Base.metadata.create_all(bind=bind_engine)
 
-    # 1. USERS & ROLES
+    # 1. USERS & ROLES (Mobile + OTP, one dummy user per role + second salesman for benchmark)
     # Non-negotiable: salesman, admin, production, accountant (read-only), owner
     users_data = [
-        ("owner", "owner123", "P. Shanmugam (Owner)", UserRole.OWNER, "+91 94431 11001"),
-        ("admin", "admin123", "K. Ramanathan (Factory Admin)", UserRole.ADMIN, "+91 94431 11002"),
-        ("salesman_a", "sales123", "S. Murugan (Salesman TN - Tiruchi & Madurai)", UserRole.SALESMAN, "+91 94431 11003"),
-        ("salesman_b", "sales123", "M. Venkatesh (Salesman Outstation)", UserRole.SALESMAN, "+91 94431 11004"),
-        ("production", "prod123", "T. Palanivel (Production Incharge)", UserRole.PRODUCTION, "+91 94431 11005"),
-        ("accountant", "acct123", "G. Sundaram (Auditor & Accountant)", UserRole.ACCOUNTANT, "+91 94431 11006"),
+        ("owner", "+919000000001", "P. Shanmugam (Owner)", UserRole.OWNER),
+        ("admin", "+919000000002", "K. Ramanathan (Factory Admin)", UserRole.ADMIN),
+        ("salesman_a", "+919000000003", "S. Murugan (Salesman TN - Tiruchi & Madurai)", UserRole.SALESMAN),
+        ("salesman_b", "+919000000004", "M. Venkatesh (Salesman Outstation)", UserRole.SALESMAN),
+        ("production", "+919000000005", "T. Palanivel (Production Incharge)", UserRole.PRODUCTION),
+        ("accountant", "+919000000006", "G. Sundaram (Auditor & Accountant)", UserRole.ACCOUNTANT),
     ]
 
     users_map = {}
-    for username, password, full_name, role, phone in users_data:
-        existing = db.query(User).filter(User.username == username).first()
+    for key, mobile, full_name, role in users_data:
+        existing = db.query(User).filter(User.mobile == mobile).first()
         if not existing:
             user = User(
-                username=username,
-                hashed_password=get_password_hash(password),
+                mobile=mobile,
                 full_name=full_name,
                 role=role,
-                phone=phone
+                is_active=True
             )
             db.add(user)
             db.flush()
-            users_map[username] = user
-            print(f"Created User: {username} [{role.value}]")
+            users_map[key] = user
+            print(f"Created User: {mobile} [{role.value}]")
         else:
-            users_map[username] = existing
+            users_map[key] = existing
 
     admin_user = users_map["admin"]
 

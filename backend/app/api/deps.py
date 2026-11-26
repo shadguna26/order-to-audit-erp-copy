@@ -9,7 +9,7 @@ from app.config import settings
 from app.models.auth import User, UserRole
 from app.schemas.auth import TokenData
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/otp/verify")
 
 def get_current_user(
     db: Session = Depends(get_db),
@@ -22,15 +22,16 @@ def get_current_user(
     )
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        username: str = payload.get("sub")
+        user_id_raw = payload.get("user_id") or payload.get("sub")
         role: str = payload.get("role")
-        if username is None or role is None:
+        token_type: str = payload.get("type")
+        if user_id_raw is None or role is None or token_type != "access":
             raise credentials_exception
-        token_data = TokenData(username=username, role=UserRole(role))
-    except (JWTError, ValueError):
+        token_data = TokenData(user_id=int(user_id_raw), role=UserRole(role))
+    except (JWTError, ValueError, TypeError):
         raise credentials_exception
 
-    user = db.query(User).filter(User.username == token_data.username).first()
+    user = db.query(User).filter(User.id == token_data.user_id).first()
     if user is None:
         raise credentials_exception
     if not user.is_active:
