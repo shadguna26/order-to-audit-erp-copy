@@ -9,6 +9,7 @@ export const AccountantScreen: React.FC<{ token: string; user: any; onSelectStoc
   const [ageingData, setAgeingData] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'sales' | 'gst' | 'ageing'>('sales');
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [exportingFormat, setExportingFormat] = useState<'csv' | 'excel' | null>(null);
 
   useEffect(() => {
     loadReports();
@@ -41,8 +42,8 @@ export const AccountantScreen: React.FC<{ token: string; user: any; onSelectStoc
 
   const handleExport = async (format: 'csv' | 'excel') => {
     setDownloadError(null);
+    setExportingFormat(format);
     const ext = format === 'csv' ? 'csv' : 'xlsx';
-    const mimeType = format === 'csv' ? 'text/csv' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     try {
       await downloadFile(
         `/api/v1/reports/${reportEndpoint()}?format=${format}`,
@@ -50,7 +51,9 @@ export const AccountantScreen: React.FC<{ token: string; user: any; onSelectStoc
         token
       );
     } catch (e: any) {
-      setDownloadError(e.message || 'Export failed');
+      setDownloadError(`${t('common.download_failed')} (${e.message || 'Error'})`);
+    } finally {
+      setExportingFormat(null);
     }
   };
 
@@ -64,15 +67,17 @@ export const AccountantScreen: React.FC<{ token: string; user: any; onSelectStoc
         <div className="flex gap-2">
           <button
             onClick={() => handleExport('csv')}
-            className="px-3 py-1.5 border border-stone-300 font-semibold text-xs rounded bg-white hover:bg-stone-50 dark:bg-stone-800 dark:hover:bg-stone-700 dark:border-stone-600 dark:text-stone-200"
+            disabled={exportingFormat !== null}
+            className="px-3 py-1.5 border border-stone-300 font-semibold text-xs rounded bg-white hover:bg-stone-50 dark:bg-stone-800 dark:hover:bg-stone-700 dark:border-stone-600 dark:text-stone-200 disabled:opacity-50"
           >
-            {t('accountant.export_csv')}
+            {exportingFormat === 'csv' ? t('common.downloading') : t('accountant.export_csv')}
           </button>
           <button
             onClick={() => handleExport('excel')}
-            className="px-3 py-1.5 bg-leaf-600 hover:bg-leaf-700 text-white font-semibold text-xs rounded"
+            disabled={exportingFormat !== null}
+            className="px-3 py-1.5 bg-leaf-600 hover:bg-leaf-700 text-white font-semibold text-xs rounded disabled:opacity-50"
           >
-            {t('accountant.export_excel')}
+            {exportingFormat === 'excel' ? t('common.downloading') : t('accountant.export_excel')}
           </button>
         </div>
       </div>

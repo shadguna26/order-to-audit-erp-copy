@@ -19,6 +19,8 @@ export const AdminScreen: React.FC<{ token: string; user: any; onSelectStock: (t
 
   const [msg, setMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
+  const [sharingId, setSharingId] = useState<number | null>(null);
 
   useEffect(() => {
     loadData();
@@ -101,25 +103,32 @@ export const AdminScreen: React.FC<{ token: string; user: any; onSelectStock: (t
   const handleDownloadPdf = async (invId: number, invNo: string) => {
     try {
       setDownloadError(null);
+      setDownloadingId(invId);
       const cleanNo = invNo.replace(/[/\\:*?"<>|]/g, '-');
-      await downloadFile(`/api/v1/invoices/${invId}/pdf`, `Invoice_${cleanNo}.pdf`, token);
+      await downloadFile(`/api/v1/invoices/${invId}/pdf`, `${cleanNo}.pdf`, token);
     } catch (e: any) {
-      setDownloadError(e.message || 'Download failed');
+      setDownloadError(`${t('common.download_failed')} (${e.message || 'Error'})`);
+    } finally {
+      setDownloadingId(null);
     }
   };
 
   const handleShareWhatsApp = async (invId: number, invNo: string, waUrl: string) => {
     try {
+      setDownloadError(null);
+      setSharingId(invId);
       const cleanNo = invNo.replace(/[/\\:*?"<>|]/g, '-');
       await shareFile(
         `/api/v1/invoices/${invId}/pdf`,
-        `Invoice_${cleanNo}.pdf`,
-        token,
-        `Invoice ${invNo} from Sri Lakshmi Snacks`
+        `${cleanNo}.pdf`,
+        `Invoice ${invNo} from Sri Lakshmi Snacks`,
+        token
       );
     } catch (_e) {
       // Final fallback: open the wa.me URL they already have
       if (waUrl) window.open(waUrl, '_blank', 'noopener,noreferrer');
+    } finally {
+      setSharingId(null);
     }
   };
 
@@ -232,16 +241,18 @@ export const AdminScreen: React.FC<{ token: string; user: any; onSelectStock: (t
                   <td className="p-3 text-right space-x-2">
                     <button
                       onClick={() => handleDownloadPdf(inv.id, inv.invoice_no)}
-                      className="px-2.5 py-1 bg-stone-200 dark:bg-stone-700 font-semibold rounded hover:bg-stone-300 dark:hover:bg-stone-600 text-xs"
+                      disabled={downloadingId === inv.id}
+                      className="px-2.5 py-1 bg-stone-200 dark:bg-stone-700 font-semibold rounded hover:bg-stone-300 dark:hover:bg-stone-600 text-xs disabled:opacity-50"
                     >
-                      PDF
+                      {downloadingId === inv.id ? t('common.downloading') : 'PDF'}
                     </button>
                     {inv.whatsapp_share_url && (
                       <button
                         onClick={() => handleShareWhatsApp(inv.id, inv.invoice_no, inv.whatsapp_share_url)}
-                        className="px-2.5 py-1 bg-emerald-600 text-white font-semibold rounded hover:bg-emerald-700 text-xs"
+                        disabled={sharingId === inv.id}
+                        className="px-2.5 py-1 bg-emerald-600 text-white font-semibold rounded hover:bg-emerald-700 text-xs disabled:opacity-50"
                       >
-                        WhatsApp
+                        {sharingId === inv.id ? t('common.sharing') : 'WhatsApp'}
                       </button>
                     )}
                     <button

@@ -73,6 +73,9 @@
     "date": "Date",
     "status": "Status",
     "actions": "Actions",
+    "downloading": "Downloading...",
+    "sharing": "Sharing...",
+    "download_failed": "Download failed. Please try again.",
     "offline_notice": "Offline mode active. Orders will sync automatically when network returns."
   },
   "guide": {
