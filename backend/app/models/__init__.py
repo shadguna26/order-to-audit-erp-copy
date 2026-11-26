@@ -1,5 +1,5 @@
 # Import all models here so Alembic and Base.metadata see them together
-from app.models.auth import User, UserRole
+from app.models.auth import User, UserRole, OTPRequest, RefreshToken
 from app.models.master import (
     MaterialType,
     BaseUnitType,

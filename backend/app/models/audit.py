@@ -14,10 +14,10 @@ class AuditLog(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     table_name = Column(String(50), nullable=False, index=True)
     record_id = Column(Integer, nullable=False, index=True)
-    action = Column(String(20), nullable=False) # INSERT, UPDATE, CANCEL
+    action = Column(String(30), nullable=False) # INSERT, UPDATE, CANCEL, otp_requested, login_success, etc.
     old_values = Column(JSON, nullable=True)
     new_values = Column(JSON, nullable=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     user = relationship("User")
