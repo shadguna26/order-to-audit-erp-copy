@@ -22,3 +22,20 @@ frontend/.vite/
 .env
 .DS_Store
 Thumbs.db
+
+# Additional ignored patterns
+node_modules/
+# duplicate for backend if any
+backend/.venv/
+# Build artifacts
+build/
+*.log
+.coverage
+htmlcov/
+coverage/
+*.mp4
+*.zip
+# Docker volumes / data folders
+docker-data/
+# IDE folders
+.vscode/
