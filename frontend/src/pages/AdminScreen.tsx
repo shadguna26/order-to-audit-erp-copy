@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { downloadFile, shareFile } from '../lib/download';
 
 export const AdminScreen: React.FC<{ token: string; user: any; onSelectStock: (type: string, id: number) => void }> = ({ token, user, onSelectStock }) => {
   const { t } = useTranslation();
@@ -17,6 +18,7 @@ export const AdminScreen: React.FC<{ token: string; user: any; onSelectStock: (t
   const [paymentAmountPaise, setPaymentAmountPaise] = useState(400000); // Rs 4,000
 
   const [msg, setMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -96,11 +98,41 @@ export const AdminScreen: React.FC<{ token: string; user: any; onSelectStock: (t
     }
   };
 
+  const handleDownloadPdf = async (invId: number, invNo: string) => {
+    try {
+      setDownloadError(null);
+      const cleanNo = invNo.replace(/[/\\:*?"<>|]/g, '-');
+      await downloadFile(`/api/v1/invoices/${invId}/pdf`, `Invoice_${cleanNo}.pdf`, token);
+    } catch (e: any) {
+      setDownloadError(e.message || 'Download failed');
+    }
+  };
+
+  const handleShareWhatsApp = async (invId: number, invNo: string, waUrl: string) => {
+    try {
+      const cleanNo = invNo.replace(/[/\\:*?"<>|]/g, '-');
+      await shareFile(
+        `/api/v1/invoices/${invId}/pdf`,
+        `Invoice_${cleanNo}.pdf`,
+        token,
+        `Invoice ${invNo} from Sri Lakshmi Snacks`
+      );
+    } catch (_e) {
+      // Final fallback: open the wa.me URL they already have
+      if (waUrl) window.open(waUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <div data-no-fx="true" className="space-y-6">
       {msg && (
         <div className={`p-3 rounded text-xs ${msg.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' : 'bg-rose-50 text-rose-800 border border-rose-300'}`}>
           {msg.text}
+        </div>
+      )}
+      {downloadError && (
+        <div className="p-3 rounded text-xs bg-rose-50 text-rose-800 border border-rose-300">
+          ⚠️ {downloadError}
         </div>
       )}
 
@@ -198,27 +230,23 @@ export const AdminScreen: React.FC<{ token: string; user: any; onSelectStock: (t
                     </span>
                   </td>
                   <td className="p-3 text-right space-x-2">
-                    <a
-                      href={`/api/v1/invoices/${inv.id}/pdf`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-2.5 py-1 bg-stone-200 dark:bg-stone-700 font-semibold rounded hover:bg-stone-300"
+                    <button
+                      onClick={() => handleDownloadPdf(inv.id, inv.invoice_no)}
+                      className="px-2.5 py-1 bg-stone-200 dark:bg-stone-700 font-semibold rounded hover:bg-stone-300 dark:hover:bg-stone-600 text-xs"
                     >
                       PDF
-                    </a>
+                    </button>
                     {inv.whatsapp_share_url && (
-                      <a
-                        href={inv.whatsapp_share_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-2.5 py-1 bg-emerald-600 text-white font-semibold rounded hover:bg-emerald-700"
+                      <button
+                        onClick={() => handleShareWhatsApp(inv.id, inv.invoice_no, inv.whatsapp_share_url)}
+                        className="px-2.5 py-1 bg-emerald-600 text-white font-semibold rounded hover:bg-emerald-700 text-xs"
                       >
                         WhatsApp
-                      </a>
+                      </button>
                     )}
                     <button
                       onClick={() => setSelectedInvoiceForDispatch(inv)}
-                      className="px-2.5 py-1 bg-stone-800 text-white font-bold rounded hover:bg-stone-900"
+                      className="px-2.5 py-1 bg-stone-800 text-white font-bold rounded hover:bg-stone-900 text-xs"
                     >
                       Dispatch
                     </button>

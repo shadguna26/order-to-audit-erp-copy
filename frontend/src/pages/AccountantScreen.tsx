@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { downloadFile } from '../lib/download';
 
 export const AccountantScreen: React.FC<{ token: string; user: any; onSelectStock: (type: string, id: number) => void }> = ({ token, user, onSelectStock }) => {
   const { t } = useTranslation();
@@ -7,6 +8,7 @@ export const AccountantScreen: React.FC<{ token: string; user: any; onSelectStoc
   const [gstData, setGstData] = useState<any | null>(null);
   const [ageingData, setAgeingData] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'sales' | 'gst' | 'ageing'>('sales');
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   useEffect(() => {
     loadReports();
@@ -25,6 +27,33 @@ export const AccountantScreen: React.FC<{ token: string; user: any; onSelectStoc
     } catch {}
   };
 
+  const reportEndpoint = () => {
+    if (activeTab === 'sales') return 'sales-register';
+    if (activeTab === 'ageing') return 'ageing-report';
+    return 'purchase-register';
+  };
+
+  const reportFilename = (fmt: string) => {
+    if (activeTab === 'sales') return `Sales_Register.${fmt}`;
+    if (activeTab === 'ageing') return `Ageing_Report.${fmt}`;
+    return `Purchase_Register.${fmt}`;
+  };
+
+  const handleExport = async (format: 'csv' | 'excel') => {
+    setDownloadError(null);
+    const ext = format === 'csv' ? 'csv' : 'xlsx';
+    const mimeType = format === 'csv' ? 'text/csv' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    try {
+      await downloadFile(
+        `/api/v1/reports/${reportEndpoint()}?format=${format}`,
+        reportFilename(ext),
+        token
+      );
+    } catch (e: any) {
+      setDownloadError(e.message || 'Export failed');
+    }
+  };
+
   return (
     <div data-no-fx="true" className="space-y-5">
       <div className="flex justify-between items-center bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 p-4 rounded">
@@ -33,20 +62,25 @@ export const AccountantScreen: React.FC<{ token: string; user: any; onSelectStoc
           <p className="text-xs text-stone-500">Read-only audit registers with CSV and Excel export.</p>
         </div>
         <div className="flex gap-2">
-          <a
-            href={`/api/v1/reports/${activeTab === 'sales' ? 'sales-register' : activeTab === 'ageing' ? 'ageing-report' : 'purchase-register'}?format=csv`}
-            className="px-3 py-1.5 border border-stone-300 font-semibold text-xs rounded bg-white hover:bg-stone-50"
+          <button
+            onClick={() => handleExport('csv')}
+            className="px-3 py-1.5 border border-stone-300 font-semibold text-xs rounded bg-white hover:bg-stone-50 dark:bg-stone-800 dark:hover:bg-stone-700 dark:border-stone-600 dark:text-stone-200"
           >
             {t('accountant.export_csv')}
-          </a>
-          <a
-            href={`/api/v1/reports/${activeTab === 'sales' ? 'sales-register' : activeTab === 'ageing' ? 'ageing-report' : 'purchase-register'}?format=excel`}
+          </button>
+          <button
+            onClick={() => handleExport('excel')}
             className="px-3 py-1.5 bg-leaf-600 hover:bg-leaf-700 text-white font-semibold text-xs rounded"
           >
             {t('accountant.export_excel')}
-          </a>
+          </button>
         </div>
       </div>
+      {downloadError && (
+        <div className="p-3 rounded text-xs bg-rose-50 text-rose-800 border border-rose-300">
+          ⚠️ {downloadError}
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-stone-200">
