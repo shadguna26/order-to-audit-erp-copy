@@ -31,7 +31,7 @@ def create_purchase(
     2. stock_ledger (IN movement with unit cost valuation in base units)
     3. audit_log
     """
-    supplier = db.query(Supplier).filter(Supplier.id == purchase_in.supplier_id).first()
+    supplier = db.query(Supplier).filter(Supplier.id == purchase_in.supplier_id, Supplier.business_id == current_user.business_id).first()
     if not supplier:
         raise HTTPException(status_code=404, detail="Supplier not found")
 
@@ -139,7 +139,7 @@ def list_purchases(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return db.query(Purchase).order_by(Purchase.id.desc()).all()
+    return db.query(Purchase).filter(Purchase.business_id == current_user.business_id).order_by(Purchase.id.desc()).all()
 
 @router.get("/{purchase_id}", response_model=PurchaseResponse)
 def get_purchase(

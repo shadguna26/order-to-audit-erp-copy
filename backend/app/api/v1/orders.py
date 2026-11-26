@@ -32,7 +32,7 @@ def check_stock(
     On shortage, say e.g. 'Only 88 packets in stock. Short by 32.'
     and suggest number of batches to produce.
     """
-    return check_order_stock_coverage(db, product_id=product_id, requested_packets=quantity)
+    return check_order_stock_coverage(db, product_id=product_id, requested_packets=quantity, business_id=current_user.business_id)
 
 @router.post("", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
 def submit_order(
@@ -47,7 +47,8 @@ def submit_order(
             customer_id=order_in.customer_id,
             salesman_id=current_user.id,
             items=[item.model_dump() for item in order_in.items],
-            notes=order_in.notes
+            notes=order_in.notes,
+            business_id=current_user.business_id,
         )
         return order
     except ValueError as e:
@@ -59,7 +60,7 @@ def list_orders(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    query = db.query(Order)
+    query = db.query(Order).filter(Order.business_id == current_user.business_id)
     # Salesman can only see their own orders
     if current_user.role == UserRole.SALESMAN:
         query = query.filter(Order.salesman_id == current_user.id)
@@ -75,7 +76,7 @@ def get_order(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    order = db.query(Order).filter(Order.id == order_id).first()
+    order = db.query(Order).filter(Order.id == order_id, Order.business_id == current_user.business_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     if current_user.role == UserRole.SALESMAN and order.salesman_id != current_user.id:

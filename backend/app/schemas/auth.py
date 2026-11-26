@@ -44,6 +44,7 @@ class TokenOut(BaseModel):
 class TokenData(BaseModel):
     user_id: Optional[int] = None
     role: Optional[UserRole] = None
+    business_id: Optional[int] = None
 
 
 class UserCreateIn(BaseModel):

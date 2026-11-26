@@ -27,7 +27,8 @@ def record_stock_movement(
     source_doc_id: int,
     created_by: int,
     batch_no: Optional[str] = None,
-    expiry_date: Optional[date] = None
+    expiry_date: Optional[date] = None,
+    business_id: int = 1,
 ) -> StockLedger:
     """
     NON-NEGOTIABLE RULE 1:
@@ -41,6 +42,7 @@ def record_stock_movement(
         raise ValueError(f"Quantity for stock movement must be positive: {qty_base}")
 
     entry = StockLedger(
+        business_id=business_id,
         item_type=item_type,
         item_id=item_id,
         location_type=location_type,
@@ -62,7 +64,8 @@ def get_item_stock_balance(
     db: Session,
     item_type: StockItemType,
     item_id: int,
-    location_type: Optional[StockLocationType] = None
+    location_type: Optional[StockLocationType] = None,
+    business_id: int = 1,
 ) -> Decimal:
     """
     Calculates stock balance dynamically from the append-only stock ledger:
@@ -79,6 +82,7 @@ def get_item_stock_balance(
             0
         )
     ).filter(
+        StockLedger.business_id == business_id,
         StockLedger.item_type == item_type,
         StockLedger.item_id == item_id
     )
@@ -89,15 +93,21 @@ def get_item_stock_balance(
     balance = query.scalar()
     return Decimal(str(balance or "0.0000"))
 
-def get_all_stock_summary(db: Session) -> Dict[str, Any]:
+def get_all_stock_summary(db: Session, business_id: int = 1) -> Dict[str, Any]:
     """
     Returns full factory stock snapshot computed dynamically from stock_ledger:
     - Raw materials
     - Packaging items
     - Finished goods
     """
-    raw_materials = db.query(RawMaterial).filter(RawMaterial.is_active == True).all()
-    products = db.query(Product).filter(Product.is_active == True).all()
+    raw_materials = db.query(RawMaterial).filter(
+        RawMaterial.business_id == business_id,
+        RawMaterial.is_active == True,
+    ).all()
+    products = db.query(Product).filter(
+        Product.business_id == business_id,
+        Product.is_active == True,
+    ).all()
 
     materials_summary = []
     for rm in raw_materials:
@@ -106,7 +116,8 @@ def get_all_stock_summary(db: Session) -> Dict[str, Any]:
             db,
             item_type=StockItemType.RAW_MATERIAL,
             item_id=rm.id,
-            location_type=loc
+            location_type=loc,
+            business_id=business_id,
         )
         display_val, display_unit = format_base_quantity_for_display(balance_base, rm.base_unit)
         materials_summary.append({
@@ -128,7 +139,8 @@ def get_all_stock_summary(db: Session) -> Dict[str, Any]:
             db,
             item_type=StockItemType.FINISHED_GOODS,
             item_id=p.id,
-            location_type=StockLocationType.FINISHED
+            location_type=StockLocationType.FINISHED,
+            business_id=business_id,
         )
         display_val, display_unit = format_base_quantity_for_display(balance_base, p.base_unit)
         products_summary.append({
@@ -152,13 +164,15 @@ def get_item_ledger_history(
     db: Session,
     item_type: StockItemType,
     item_id: int,
-    limit: int = 100
+    limit: int = 100,
+    business_id: int = 1,
 ) -> List[StockLedger]:
     """
     Fetches immutable ledger trail for any item.
     Rule: 'Clicking any stock number opens its ledger showing every movement and source document.'
     """
     return db.query(StockLedger).filter(
+        StockLedger.business_id == business_id,
         StockLedger.item_type == item_type,
         StockLedger.item_id == item_id
     ).order_by(desc(StockLedger.id)).limit(limit).all()

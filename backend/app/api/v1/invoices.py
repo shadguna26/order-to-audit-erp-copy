@@ -33,7 +33,7 @@ def generate_invoice(
     Invoice numbers follow financial year, e.g. TN/2026-27/0001.
     """
     try:
-        invoice = create_invoice_for_order(db=db, order_id=order_id, user_id=current_user.id)
+        invoice = create_invoice_for_order(db=db, order_id=order_id, user_id=current_user.id, business_id=current_user.business_id)
         res = InvoiceResponse.model_validate(invoice)
         res.whatsapp_share_url = generate_whatsapp_share_url(invoice)
         return res
@@ -45,7 +45,7 @@ def list_invoices(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    invoices = db.query(Invoice).order_by(Invoice.id.desc()).all()
+    invoices = db.query(Invoice).filter(Invoice.business_id == current_user.business_id).order_by(Invoice.id.desc()).all()
     results = []
     for inv in invoices:
         r = InvoiceResponse.model_validate(inv)
@@ -59,7 +59,7 @@ def get_invoice(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
+    invoice = db.query(Invoice).filter(Invoice.id == invoice_id, Invoice.business_id == current_user.business_id).first()
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
     res = InvoiceResponse.model_validate(invoice)
@@ -73,7 +73,7 @@ def download_invoice_pdf(
     current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.OWNER, UserRole.ACCOUNTANT]))
 ):
     """Returns commercial GST Tax Invoice PDF."""
-    invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
+    invoice = db.query(Invoice).filter(Invoice.id == invoice_id, Invoice.business_id == current_user.business_id).first()
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
 

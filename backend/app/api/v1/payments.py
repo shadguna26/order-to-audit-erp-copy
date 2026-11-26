@@ -37,7 +37,8 @@ def receive_payment(
             payment_mode=payment_in.payment_mode,
             reference_no=payment_in.reference_no,
             notes=payment_in.notes,
-            user_id=current_user.id
+            user_id=current_user.id,
+            business_id=current_user.business_id,
         )
         return payment
     except ValueError as e:
@@ -48,7 +49,7 @@ def list_payments(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return db.query(Payment).order_by(Payment.id.desc()).all()
+    return db.query(Payment).filter(Payment.business_id == current_user.business_id).order_by(Payment.id.desc()).all()
 
 @router.get("/customer/{customer_id}/outstanding", response_model=CustomerBalanceResponse)
 def get_customer_balance(

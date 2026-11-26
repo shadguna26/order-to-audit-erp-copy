@@ -3,6 +3,7 @@ import math
 from typing import Dict, Any, List
 from sqlalchemy.orm import Session
 
+from app.models.business import Business
 from app.models.master import Product, Customer, PriceList, BOM
 from app.models.stock import StockItemType, StockLocationType
 from app.models.sales import Order, OrderItem, OrderStatus
@@ -10,7 +11,7 @@ from app.services.ledger_service import get_item_stock_balance
 from app.services.sequence_service import generate_document_sequence
 from app.services.gst_service import calculate_gst_breakdown
 
-def check_order_stock_coverage(db: Session, product_id: int, requested_packets: int) -> Dict[str, Any]:
+def check_order_stock_coverage(db: Session, product_id: int, requested_packets: int, business_id: int = 1) -> Dict[str, Any]:
     """
     NON-NEGOTIABLE BUSINESS LOGIC:
     Order stock check: show whether finished-goods stock covers each order line.
@@ -21,15 +22,16 @@ def check_order_stock_coverage(db: Session, product_id: int, requested_packets: 
         db=db,
         item_type=StockItemType.FINISHED_GOODS,
         item_id=product_id,
-        location_type=StockLocationType.FINISHED
+        location_type=StockLocationType.FINISHED,
+        business_id=business_id,
     )
     avail_packets = int(avail_balance)
 
     has_shortage = requested_packets > avail_packets
     shortage_packets = max(0, requested_packets - avail_packets)
 
-    product = db.query(Product).filter(Product.id == product_id).first()
-    bom = db.query(BOM).filter(BOM.product_id == product_id).first()
+    product = db.query(Product).filter(Product.id == product_id, Product.business_id == business_id).first()
+    bom = db.query(BOM).filter(BOM.product_id == product_id, BOM.business_id == business_id).first()
 
     suggested_batches = 0
     shortage_message = None
@@ -56,20 +58,25 @@ def create_customer_order(
     customer_id: int,
     salesman_id: int,
     items: List[Dict[str, Any]],
-    notes: str = None
+    notes: str = None,
+    business_id: int = 1,
 ) -> Order:
-    customer = db.query(Customer).filter(Customer.id == customer_id).first()
+    customer = db.query(Customer).filter(Customer.id == customer_id, Customer.business_id == business_id).first()
     if not customer:
         raise ValueError("Customer not found")
+
+    business = db.query(Business).filter(Business.id == business_id).first()
 
     order_no = generate_document_sequence(
         db,
         model_class=Order,
         no_column=Order.order_no,
-        prefix="SO"
+        prefix="SO",
+        business_id=business_id,
     )
 
     order = Order(
+        business_id=business_id,
         order_no=order_no,
         customer_id=customer_id,
         salesman_id=salesman_id,
@@ -83,7 +90,7 @@ def create_customer_order(
         p_id = item_data["product_id"]
         qty_pkts = int(item_data["quantity_packets"])
 
-        product = db.query(Product).filter(Product.id == p_id).first()
+        product = db.query(Product).filter(Product.id == p_id, Product.business_id == business_id).first()
         if not product:
             raise ValueError(f"Product {p_id} not found")
 
@@ -92,6 +99,7 @@ def create_customer_order(
         price_entry = (
             db.query(PriceList)
             .filter(
+                PriceList.business_id == business_id,
                 PriceList.product_id == p_id,
                 PriceList.customer_type == customer.customer_type,
                 PriceList.effective_from <= now_utc,
@@ -109,7 +117,9 @@ def create_customer_order(
             subtotal_paise=subtotal_paise,
             gst_rate_pct=product.gst_rate_pct,
             customer_state_code=customer.state_code,
-            customer_state=customer.state
+            customer_state=customer.state,
+            company_state_code=business.state_code if business else None,
+            company_state=business.state if business else None,
         )
 
         order_item = OrderItem(
