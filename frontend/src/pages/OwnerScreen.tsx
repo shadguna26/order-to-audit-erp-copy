@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ProductsManager } from '../components/ProductsManager';
+import { RawMaterialsManager } from '../components/RawMaterialsManager';
 
 export const OwnerScreen: React.FC<{ token: string; user: any; onSelectStock: (type: string, id: number) => void }> = ({ token, user, onSelectStock }) => {
   const { t } = useTranslation();
   const [data, setData] = useState<any | null>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'materials'>('overview');
 
   useEffect(() => {
     loadDashboard();
@@ -22,6 +25,31 @@ export const OwnerScreen: React.FC<{ token: string; user: any; onSelectStock: (t
 
   return (
     <div className="space-y-6">
+      <div className="flex gap-2 border-b border-stone-200 dark:border-stone-700">
+        <button
+          onClick={() => setActiveTab('overview')}
+          className={`pb-2 px-3 text-xs font-bold border-b-2 ${activeTab === 'overview' ? 'border-turmeric-600 text-turmeric-700' : 'border-transparent text-stone-500'}`}
+        >
+          Executive Overview
+        </button>
+        <button
+          onClick={() => setActiveTab('products')}
+          className={`pb-2 px-3 text-xs font-bold border-b-2 ${activeTab === 'products' ? 'border-turmeric-600 text-turmeric-700' : 'border-transparent text-stone-500'}`}
+        >
+          Products & Recipes
+        </button>
+        <button
+          onClick={() => setActiveTab('materials')}
+          className={`pb-2 px-3 text-xs font-bold border-b-2 ${activeTab === 'materials' ? 'border-turmeric-600 text-turmeric-700' : 'border-transparent text-stone-500'}`}
+        >
+          Raw Materials
+        </button>
+      </div>
+
+      {activeTab === 'products' && <ProductsManager token={token} />}
+      {activeTab === 'materials' && <RawMaterialsManager token={token} />}
+      {activeTab === 'overview' && (
+        <>
       {/* Authentic Market & Factory Status Banner */}
       <div className="relative overflow-hidden rounded-xl border border-stone-300 dark:border-stone-800 bg-stone-900 text-white shadow-md">
         <img
@@ -130,6 +158,8 @@ export const OwnerScreen: React.FC<{ token: string; user: any; onSelectStock: (t
           </tbody>
         </table>
       </div>
+        </>
+      )}
     </div>
   );
 };

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { downloadFile, shareFile } from '../lib/download';
+import { ProductsManager } from '../components/ProductsManager';
+import { RawMaterialsManager } from '../components/RawMaterialsManager';
 
 export const AdminScreen: React.FC<{ token: string; user: any; onSelectStock: (type: string, id: number) => void }> = ({ token, user, onSelectStock }) => {
   const { t } = useTranslation();
@@ -21,6 +23,7 @@ export const AdminScreen: React.FC<{ token: string; user: any; onSelectStock: (t
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
   const [sharingId, setSharingId] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<'desk' | 'products' | 'materials'>('desk');
 
   useEffect(() => {
     loadData();
@@ -134,6 +137,32 @@ export const AdminScreen: React.FC<{ token: string; user: any; onSelectStock: (t
 
   return (
     <div data-no-fx="true" className="space-y-6">
+      {/* Admin Sub-Navigation */}
+      <div className="flex gap-2 border-b border-stone-200 dark:border-stone-700">
+        <button
+          onClick={() => setActiveTab('desk')}
+          className={`pb-2 px-3 text-xs font-bold border-b-2 ${activeTab === 'desk' ? 'border-turmeric-600 text-turmeric-700' : 'border-transparent text-stone-500'}`}
+        >
+          Orders & Billing
+        </button>
+        <button
+          onClick={() => setActiveTab('products')}
+          className={`pb-2 px-3 text-xs font-bold border-b-2 ${activeTab === 'products' ? 'border-turmeric-600 text-turmeric-700' : 'border-transparent text-stone-500'}`}
+        >
+          Products & Recipes (BOM)
+        </button>
+        <button
+          onClick={() => setActiveTab('materials')}
+          className={`pb-2 px-3 text-xs font-bold border-b-2 ${activeTab === 'materials' ? 'border-turmeric-600 text-turmeric-700' : 'border-transparent text-stone-500'}`}
+        >
+          Raw & Packaging Materials
+        </button>
+      </div>
+
+      {activeTab === 'products' && <ProductsManager token={token} />}
+      {activeTab === 'materials' && <RawMaterialsManager token={token} />}
+      {activeTab === 'desk' && (
+        <>
       {msg && (
         <div className={`p-3 rounded text-xs ${msg.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' : 'bg-rose-50 text-rose-800 border border-rose-300'}`}>
           {msg.text}
@@ -346,6 +375,8 @@ export const AdminScreen: React.FC<{ token: string; user: any; onSelectStock: (t
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

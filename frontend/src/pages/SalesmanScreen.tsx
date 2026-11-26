@@ -8,6 +8,7 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
   const { t, i18n } = useTranslation();
   const [customers, setCustomers] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [productSearch, setProductSearch] = useState('');
   const [selectedCustomerId, setSelectedCustomerId] = useState<number>(1);
   const [selectedProductId, setSelectedProductId] = useState<number>(1);
   const [quantity, setQuantity] = useState<number>(150);
@@ -57,7 +58,7 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
           target: '[data-guide="salesman-submit"]',
           messageKey: 'guide.salesman_submit',
           guideKey: 'salesman_flow_submit',
-          onGotIt: () => {}
+          onGotIt: () => { }
         };
     }
   };
@@ -92,19 +93,47 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
   };
 
   const loadMasterData = async () => {
+    const CACHE_KEY = 'sls_products_cache';
+    const VER_KEY = 'sls_products_updated_at';
+    let cached: any[] = [];
     try {
-      const stockRes = await fetch('/api/v1/stock/summary', { headers: { Authorization: `Bearer ${token}` } });
-      if (stockRes.ok) {
-        const data = await stockRes.json();
-        setProducts(data.finished_goods);
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (raw) cached = JSON.parse(raw);
+    } catch { }
+    if (cached.length > 0) setProducts(cached);
+
+    try {
+      const lastUpdated = cached.length > 0 ? localStorage.getItem(VER_KEY) : null;
+      const url = lastUpdated
+        ? `/api/v1/products?updated_since=${encodeURIComponent(lastUpdated)}`
+        : '/api/v1/products';
+      const prodRes = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      if (prodRes.ok) {
+        const incoming: any[] = await prodRes.json();
+        const mergedMap = new Map<number, any>();
+        for (const p of cached) mergedMap.set(p.id, p);
+        for (const p of incoming) mergedMap.set(p.id, p);
+        const merged = Array.from(mergedMap.values()).filter((p) => p.is_active !== false);
+        setProducts(merged);
+        localStorage.setItem(CACHE_KEY, JSON.stringify(merged));
+        localStorage.setItem(VER_KEY, new Date().toISOString());
+      } else if (cached.length === 0) {
+        const stockRes = await fetch('/api/v1/stock/summary', { headers: { Authorization: `Bearer ${token}` } });
+        if (stockRes.ok) {
+          const data = await stockRes.json();
+          setProducts(data.finished_goods);
+        }
       }
-      // Seeded customers
-      setCustomers([
-        { id: 1, name: 'Retailer A (Sri Balaji Provision Stores)', state: 'Tamil Nadu' },
-        { id: 2, name: 'Distributor B (Cauvery Sweets & Snacks)', state: 'Karnataka' },
-        { id: 3, name: 'Retailer C (Murugan Maligai)', state: 'Tamil Nadu' },
-      ]);
-    } catch {}
+    } catch {
+      // Offline: keep cached products
+    }
+
+    // Seeded customers
+    setCustomers([
+      { id: 1, name: 'Retailer A (Sri Balaji Provision Stores)', state: 'Tamil Nadu' },
+      { id: 2, name: 'Distributor B (Cauvery Sweets & Snacks)', state: 'Karnataka' },
+      { id: 3, name: 'Retailer C (Murugan Maligai)', state: 'Tamil Nadu' },
+    ]);
   };
 
   const loadMyOrders = async () => {
@@ -113,7 +142,7 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
       if (res.ok) {
         setMyOrders(await res.json());
       }
-    } catch {}
+    } catch { }
   };
 
   const checkLiveStock = async (prodId: number, qty: number) => {
@@ -124,7 +153,7 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
       if (res.ok) {
         setStockCheck(await res.json());
       }
-    } catch {}
+    } catch { }
   };
 
   const submitOrderDirect = async (orderPayload: any) => {
@@ -242,9 +271,8 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
             type="button"
             data-guide="salesman-voice"
             onClick={handleVoiceStart}
-            className={`min-h-[48px] px-4 rounded font-bold text-xs flex items-center gap-2 transition-all ${
-              isListening ? 'bg-chilli-600 text-white animate-pulse' : 'bg-turmeric-100 text-turmeric-800 border border-turmeric-500 hover:bg-turmeric-200'
-            }`}
+            className={`min-h-[48px] px-4 rounded font-bold text-xs flex items-center gap-2 transition-all ${isListening ? 'bg-chilli-600 text-white animate-pulse' : 'bg-turmeric-100 text-turmeric-800 border border-turmeric-500 hover:bg-turmeric-200'
+              }`}
           >
             <span>🎙️</span>
             {isListening ? t('salesman.listening') : t('salesman.voice_input')}
@@ -278,8 +306,26 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
             <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
               {t('salesman.add_products')}
             </label>
+            <input
+              type="text"
+              value={productSearch}
+              onChange={(e) => setProductSearch(e.target.value)}
+              placeholder="Search English / தமிழ் / alias..."
+              className="w-full min-h-[38px] px-3 mb-2 bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded text-xs"
+            />
             <div className="grid grid-cols-2 gap-2 mb-2">
-              {products.map((p) => {
+              {products
+                .filter((p) => {
+                  const q = productSearch.trim().toLowerCase();
+                  if (!q) return true;
+                  return (
+                    (p.name || '').toLowerCase().includes(q) ||
+                    (p.name_ta || '').toLowerCase().includes(q) ||
+                    (p.code || '').toLowerCase().includes(q) ||
+                    (p.voice_aliases || '').toLowerCase().includes(q)
+                  );
+                })
+                .map((p) => {
                 const isSelected = selectedProductId === p.id;
                 return (
                   <button
@@ -289,13 +335,13 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
                       setSelectedProductId(p.id);
                       setActiveGuideStep('stepper');
                     }}
-                    className={`p-2.5 rounded-lg border text-left transition flex flex-col justify-between ${
-                      isSelected
-                        ? 'border-turmeric-600 bg-amber-50 dark:bg-amber-950/40 shadow-xs'
-                        : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 hover:border-turmeric-400'
-                    }`}
+                    className={`p-2.5 rounded-lg border text-left transition flex flex-col justify-between ${isSelected
+                      ? 'border-turmeric-600 bg-amber-50 dark:bg-amber-950/40 shadow-xs'
+                      : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 hover:border-turmeric-400'
+                      }`}
                   >
                     <span className="font-bold text-xs text-stone-900 dark:text-white">{p.name}</span>
+                    {p.name_ta && <span className="text-[10px] text-stone-500">{p.name_ta}</span>}
                     <span className="text-[11px] text-stone-500 font-mono mt-1">Stock: {p.balance_packets} pkts</span>
                   </button>
                 );
@@ -436,11 +482,10 @@ export const SalesmanScreen: React.FC<{ token: string; user: any; onSelectStock:
                   <span className="font-bold text-stone-900 dark:text-white">{o.order_no}</span>
                   <span className="text-stone-500 ml-2">Customer #{o.customer_id}</span>
                 </div>
-                <span className={`px-2 py-0.5 rounded uppercase font-semibold text-[10px] ${
-                  o.status === 'dispatched' ? 'bg-emerald-100 text-emerald-800' :
+                <span className={`px-2 py-0.5 rounded uppercase font-semibold text-[10px] ${o.status === 'dispatched' ? 'bg-emerald-100 text-emerald-800' :
                   o.status === 'invoiced' ? 'bg-blue-100 text-blue-800' :
-                  o.status === 'approved' ? 'bg-amber-100 text-amber-800' : 'bg-stone-100 text-stone-700'
-                }`}>
+                    o.status === 'approved' ? 'bg-amber-100 text-amber-800' : 'bg-stone-100 text-stone-700'
+                  }`}>
                   {o.status}
                 </span>
               </div>

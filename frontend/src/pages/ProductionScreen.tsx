@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GuideHelper } from '../components/GuideHelper.jsx';
+import { RawMaterialsManager } from '../components/RawMaterialsManager';
 
 export const ProductionScreen: React.FC<{ token: string; user: any; onSelectStock: (type: string, id: number) => void }> = ({ token, user, onSelectStock }) => {
   const { t } = useTranslation();
@@ -15,6 +16,7 @@ export const ProductionScreen: React.FC<{ token: string; user: any; onSelectStoc
 
   const [msg, setMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [prodStep, setProdStep] = useState<'output' | 'issue' | 'save'>('output');
+  const [activeTab, setActiveTab] = useState<'runs' | 'materials'>('runs');
 
   useEffect(() => {
     loadPlanning();
@@ -27,7 +29,7 @@ export const ProductionScreen: React.FC<{ token: string; user: any; onSelectStoc
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) setPlans(await res.json());
-    } catch {}
+    } catch { }
   };
 
   const loadPrefill = async () => {
@@ -36,7 +38,7 @@ export const ProductionScreen: React.FC<{ token: string; user: any; onSelectStoc
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) setPrefill(await res.json());
-    } catch {}
+    } catch { }
   };
 
   const handleSaveRun = async (e: React.FormEvent) => {
@@ -82,6 +84,24 @@ export const ProductionScreen: React.FC<{ token: string; user: any; onSelectStoc
 
   return (
     <div className="space-y-6">
+      <div className="flex gap-2 border-b border-stone-200 dark:border-stone-700">
+        <button
+          onClick={() => setActiveTab('runs')}
+          className={`pb-2 px-3 text-xs font-bold border-b-2 ${activeTab === 'runs' ? 'border-turmeric-600 text-turmeric-700' : 'border-transparent text-stone-500'}`}
+        >
+          Production Runs
+        </button>
+        <button
+          onClick={() => setActiveTab('materials')}
+          className={`pb-2 px-3 text-xs font-bold border-b-2 ${activeTab === 'materials' ? 'border-turmeric-600 text-turmeric-700' : 'border-transparent text-stone-500'}`}
+        >
+          Raw & Packaging Materials
+        </button>
+      </div>
+
+      {activeTab === 'materials' && <RawMaterialsManager token={token} />}
+      {activeTab === 'runs' && (
+        <>
       {msg && (
         <div className={`p-3 rounded text-xs ${msg.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' : 'bg-rose-50 text-rose-800 border border-rose-300'}`}>
           {msg.text}
@@ -205,8 +225,8 @@ export const ProductionScreen: React.FC<{ token: string; user: any; onSelectStoc
           prodStep === 'output'
             ? '[data-guide="prod-output"]'
             : prodStep === 'issue'
-            ? '[data-guide="prod-issue"]'
-            : '[data-guide="prod-save"]'
+              ? '[data-guide="prod-issue"]'
+              : '[data-guide="prod-save"]'
         }
         role="worker"
         guideKey={`prod_flow_${prodStep}`}
@@ -214,8 +234,8 @@ export const ProductionScreen: React.FC<{ token: string; user: any; onSelectStoc
           prodStep === 'output'
             ? 'guide.prod_output'
             : prodStep === 'issue'
-            ? 'guide.prod_issue'
-            : 'guide.prod_save'
+              ? 'guide.prod_issue'
+              : 'guide.prod_save'
         }
         side="top"
         idleSeconds={6}
@@ -225,6 +245,8 @@ export const ProductionScreen: React.FC<{ token: string; user: any; onSelectStoc
           else if (prodStep === 'issue') setProdStep('save');
         }}
       />
+        </>
+      )}
     </div>
   );
 };
