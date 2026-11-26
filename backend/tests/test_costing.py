@@ -17,8 +17,8 @@ def test_weighted_average_cost_flour(client, db):
     flour = db.query(RawMaterial).filter(RawMaterial.code == "RM-FLOUR").first()
     supplier = db.query(Supplier).first()
 
-    prod_login = client.post("/api/v1/auth/login", data={"username": "production", "password": "prod123"})
-    prod_token = prod_login.json()["access_token"]
+    from tests.conftest import otp_login
+    prod_token = otp_login(client, "+919000000005")["access_token"]
 
     # Record purchase of 60 kg @ Rs 45/kg (4500 paise/kg)
     purchase_payload = {

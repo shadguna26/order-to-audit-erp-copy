@@ -5,11 +5,10 @@ from app.services.planning_service import get_production_plan_from_pending_order
 
 def test_production_planning_from_approved_orders(client: TestClient, db: Session):
     # Obtain salesman and admin tokens
-    salesman_res = client.post("/api/v1/auth/login", data={"username": "salesman_a", "password": "sales123"})
-    salesman_token = salesman_res.json()["access_token"]
+    from tests.conftest import otp_login
+    salesman_token = otp_login(client, "+919000000003")["access_token"]
 
-    admin_res = client.post("/api/v1/auth/login", data={"username": "admin", "password": "admin123"})
-    admin_token = admin_res.json()["access_token"]
+    admin_token = otp_login(client, "+919000000002")["access_token"]
 
     # Opening stock of Murukku 200g is 50 packets
     # Let's create an order for 250 packets (shortfall = 200 packets, exactly 1 batch of 200)

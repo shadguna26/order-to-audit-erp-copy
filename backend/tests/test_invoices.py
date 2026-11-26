@@ -10,8 +10,8 @@ def test_invoice_creation_immutability_and_credit_note(client, db):
     Posted invoices cannot be edited or deleted. They are cancelled by a credit note.
     Invoice numbers follow financial year, e.g. TN/2026-27/0001.
     """
-    admin_login = client.post("/api/v1/auth/login", data={"username": "admin", "password": "admin123"})
-    admin_token = admin_login.json()["access_token"]
+    from tests.conftest import otp_login
+    admin_token = otp_login(client, "+919000000002")["access_token"]
     headers = {"Authorization": f"Bearer {admin_token}"}
 
     retailer_a = db.query(Customer).filter(Customer.name.like("%Retailer A%")).first()

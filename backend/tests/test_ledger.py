@@ -67,8 +67,8 @@ def test_append_only_ledger_balance_sum(db):
     assert len(history) == 3
 
 def test_full_stock_summary_api(client):
-    admin_login = client.post("/api/v1/auth/login", data={"username": "admin", "password": "admin123"})
-    token = admin_login.json()["access_token"]
+    from tests.conftest import otp_login
+    token = otp_login(client, "+919000000002")["access_token"]
 
     response = client.get(
         "/api/v1/stock/summary",

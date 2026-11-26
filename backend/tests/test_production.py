@@ -22,8 +22,8 @@ def test_benchmark_steps_2_3_8_production_run(client, db):
     - Oil variance: 10.5 L vs 10 L = +5% (Flagged)
     - Oil rupee variance: 0.5 L extra @ Rs 140/L = Rs 70 (7,000 paise)
     """
-    prod_login = client.post("/api/v1/auth/login", data={"username": "production", "password": "prod123"})
-    prod_token = prod_login.json()["access_token"]
+    from tests.conftest import otp_login
+    prod_token = otp_login(client, "+919000000005")["access_token"]
     headers = {"Authorization": f"Bearer {prod_token}"}
 
     # Step 1: Purchase 60 kg flour @ Rs 45/kg

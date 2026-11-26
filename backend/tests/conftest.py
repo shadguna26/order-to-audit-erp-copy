@@ -50,3 +50,17 @@ def client():
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+
+
+def otp_login(client: TestClient, mobile: str) -> dict:
+    """Helper for tests to authenticate via mobile + OTP (DEMO_MODE)."""
+    req_res = client.post("/api/v1/auth/otp/request", json={"mobile": mobile})
+    assert req_res.status_code == 200, req_res.text
+    demo_code = req_res.json().get("demo_code")
+    assert demo_code, "DEMO_MODE must return demo_code in tests"
+    ver_res = client.post(
+        "/api/v1/auth/otp/verify",
+        json={"mobile": mobile, "otp": demo_code, "device_label": "pytest-client"},
+    )
+    assert ver_res.status_code == 200, ver_res.text
+    return ver_res.json()

@@ -37,10 +37,11 @@ def test_full_benchmark_scenario(client, db):
     - Distributor B shortage: 32 (IGST applies if invoiced)
     """
     # Authenticate actors
-    admin_tok = client.post("/api/v1/auth/login", data={"username": "admin", "password": "admin123"}).json()["access_token"]
-    prod_tok = client.post("/api/v1/auth/login", data={"username": "production", "password": "prod123"}).json()["access_token"]
-    sales_a_tok = client.post("/api/v1/auth/login", data={"username": "salesman_a", "password": "sales123"}).json()["access_token"]
-    sales_b_tok = client.post("/api/v1/auth/login", data={"username": "salesman_b", "password": "sales123"}).json()["access_token"]
+    from tests.conftest import otp_login
+    admin_tok = otp_login(client, "+919000000002")["access_token"]
+    prod_tok = otp_login(client, "+919000000005")["access_token"]
+    sales_a_tok = otp_login(client, "+919000000003")["access_token"]
+    sales_b_tok = otp_login(client, "+919000000004")["access_token"]
 
     admin_hdr = {"Authorization": f"Bearer {admin_tok}"}
     prod_hdr = {"Authorization": f"Bearer {prod_tok}"}

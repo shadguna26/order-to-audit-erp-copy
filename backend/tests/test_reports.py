@@ -6,9 +6,10 @@ from app.models.billing import Invoice
 
 def test_reports_and_dashboard_workflow(client, db):
     # 1. Logins
-    acct_token = client.post("/api/v1/auth/login", data={"username": "accountant", "password": "acct123"}).json()["access_token"]
-    owner_token = client.post("/api/v1/auth/login", data={"username": "owner", "password": "owner123"}).json()["access_token"]
-    sales_token = client.post("/api/v1/auth/login", data={"username": "salesman_a", "password": "sales123"}).json()["access_token"]
+    from tests.conftest import otp_login
+    acct_token = otp_login(client, "+919000000006")["access_token"]
+    owner_token = otp_login(client, "+919000000001")["access_token"]
+    sales_token = otp_login(client, "+919000000003")["access_token"]
 
     acct_hdr = {"Authorization": f"Bearer {acct_token}"}
     owner_hdr = {"Authorization": f"Bearer {owner_token}"}

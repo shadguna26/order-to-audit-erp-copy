@@ -1,8 +1,14 @@
+from datetime import datetime, timedelta, timezone
 import pytest
 from fastapi.testclient import TestClient
-from app.models.auth import UserRole
-from app.models.stock import StockLedger, StockItemType, StockDirection
-from app.models.master import RawMaterial, Product
+from jose import jwt
+
+from app.config import Settings, settings
+from app.models.audit import AuditLog
+from app.models.auth import OTPRequest, RefreshToken, User, UserRole
+from app.services.otp_service import generate_otp_code, hash_otp, normalize_mobile, verify_otp_hash
+from tests.conftest import otp_login
+
 
 def test_health_check(client: TestClient):
     response = client.get("/health")
@@ -12,151 +18,258 @@ def test_health_check(client: TestClient):
     assert data["app"] == "Sri Lakshmi Snacks"
     assert data["state_code"] == "33"
 
-def test_user_logins_all_five_roles(client: TestClient):
-    """
-    NON-NEGOTIABLE RULE 5:
-    Role-based access: salesman, admin, production, accountant (read-only), owner.
-    Verify logins and token issuance for all 5 roles.
-    """
-    credentials = [
-        ("owner", "owner123", UserRole.OWNER),
-        ("admin", "admin123", UserRole.ADMIN),
-        ("salesman_a", "sales123", UserRole.SALESMAN),
-        ("salesman_b", "sales123", UserRole.SALESMAN),
-        ("production", "prod123", UserRole.PRODUCTION),
-        ("accountant", "acct123", UserRole.ACCOUNTANT),
+
+def test_mobile_normalisation():
+    assert normalize_mobile("9876543210") == "+919876543210"
+    assert normalize_mobile("09876543210") == "+919876543210"
+    assert normalize_mobile("919876543210") == "+919876543210"
+    assert normalize_mobile("+91 98765-43210") == "+919876543210"
+    assert normalize_mobile("+919000000001") == "+919000000001"
+
+    for invalid in ["", "12345", "5123456789", "+14155552671", "9876543210123", "abcdefghij"]:
+        with pytest.raises(ValueError):
+            normalize_mobile(invalid)
+
+
+def test_otp_hash_and_constant_time_compare():
+    mobile = "+919000000001"
+    code = generate_otp_code()
+    assert len(code) == 6 and code.isdigit()
+
+    digest = hash_otp(mobile, code)
+    assert digest != code
+    assert len(digest) == 64  # SHA-256 hex digest
+
+    assert verify_otp_hash(mobile, code, digest) is True
+    assert verify_otp_hash(mobile, "000000" if code != "000000" else "111111", digest) is False
+    assert verify_otp_hash("+919000000002", code, digest) is False
+
+
+def test_otp_expiry(client: TestClient, db):
+    mobile = "+919000000003"
+    req_res = client.post("/api/v1/auth/otp/request", json={"mobile": mobile})
+    assert req_res.status_code == 200
+    code = req_res.json()["demo_code"]
+
+    otp_row = db.query(OTPRequest).filter(OTPRequest.mobile == mobile).order_by(OTPRequest.id.desc()).first()
+    otp_row.expires_at = datetime.now(timezone.utc) - timedelta(minutes=1)
+    db.commit()
+
+    ver_res = client.post("/api/v1/auth/otp/verify", json={"mobile": mobile, "otp": code})
+    assert ver_res.status_code == 401
+    assert ver_res.json()["detail"] == "Invalid or expired OTP"
+
+
+def test_otp_max_attempts_lockout(client: TestClient, db):
+    mobile = "+919000000003"
+    req_res = client.post("/api/v1/auth/otp/request", json={"mobile": mobile})
+    assert req_res.status_code == 200
+    real_code = req_res.json()["demo_code"]
+    wrong_code = "000000" if real_code != "000000" else "999999"
+
+    for attempt in range(1, 5):
+        res = client.post("/api/v1/auth/otp/verify", json={"mobile": mobile, "otp": wrong_code})
+        assert res.status_code == 401, f"Attempt {attempt} expected 401"
+
+    # 5th wrong try triggers lockout
+    res_5 = client.post("/api/v1/auth/otp/verify", json={"mobile": mobile, "otp": wrong_code})
+    assert res_5.status_code == 429
+
+    # Even the correct OTP is now rejected
+    res_after = client.post("/api/v1/auth/otp/verify", json={"mobile": mobile, "otp": real_code})
+    assert res_after.status_code == 401
+
+    lockout_log = db.query(AuditLog).filter(AuditLog.table_name == "auth", AuditLog.action == "lockout").first()
+    assert lockout_log is not None
+
+
+def test_otp_single_use(client: TestClient):
+    mobile = "+919000000003"
+    req_res = client.post("/api/v1/auth/otp/request", json={"mobile": mobile})
+    code = req_res.json()["demo_code"]
+
+    first_verify = client.post("/api/v1/auth/otp/verify", json={"mobile": mobile, "otp": code})
+    assert first_verify.status_code == 200
+
+    second_verify = client.post("/api/v1/auth/otp/verify", json={"mobile": mobile, "otp": code})
+    assert second_verify.status_code == 401
+    assert second_verify.json()["detail"] == "Invalid or expired OTP"
+
+
+def test_otp_resend_cooldown(client: TestClient):
+    mobile = "+919000000003"
+    first = client.post("/api/v1/auth/otp/request", json={"mobile": mobile})
+    assert first.status_code == 200
+
+    second = client.post("/api/v1/auth/otp/request", json={"mobile": mobile})
+    assert second.status_code == 429
+
+
+def test_otp_hourly_limit(client: TestClient, db):
+    mobile = "+919000000003"
+    for i in range(5):
+        res = client.post("/api/v1/auth/otp/request", json={"mobile": mobile})
+        assert res.status_code == 200, f"Send {i+1} failed: {res.text}"
+        # Backdate created_at by 60s to bypass 30s cooldown while staying within 1 hour
+        latest = db.query(OTPRequest).filter(OTPRequest.mobile == mobile).order_by(OTPRequest.id.desc()).first()
+        latest.created_at = datetime.now(timezone.utc) - timedelta(seconds=60)
+        db.commit()
+
+    sixth = client.post("/api/v1/auth/otp/request", json={"mobile": mobile})
+    assert sixth.status_code == 429
+
+
+def test_identical_response_for_unknown_numbers(client: TestClient):
+    reg_req = client.post("/api/v1/auth/otp/request", json={"mobile": "+919000000003"})
+    unk_req = client.post("/api/v1/auth/otp/request", json={"mobile": "+919876500000"})
+
+    assert reg_req.status_code == unk_req.status_code == 200
+    assert reg_req.json()["message"] == unk_req.json()["message"]
+
+    reg_ver = client.post("/api/v1/auth/otp/verify", json={"mobile": "+919000000003", "otp": "000000"})
+    unk_ver = client.post("/api/v1/auth/otp/verify", json={"mobile": "+919876500000", "otp": "000000"})
+    assert reg_ver.status_code == unk_ver.status_code == 401
+    assert reg_ver.json()["detail"] == unk_ver.json()["detail"] == "Invalid or expired OTP"
+
+    # Even with the demo_code for an unknown number, verify fails with the exact same message
+    unk_code = unk_req.json()["demo_code"]
+    unk_ver_code = client.post("/api/v1/auth/otp/verify", json={"mobile": "+919876500000", "otp": unk_code})
+    assert unk_ver_code.status_code == 401
+    assert unk_ver_code.json()["detail"] == "Invalid or expired OTP"
+
+
+def test_role_in_token_and_backend_enforcement(client: TestClient):
+    # No self-signup
+    assert client.post("/api/v1/auth/register", json={}).status_code == 404
+
+    roles_mobiles = [
+        ("+919000000001", UserRole.OWNER),
+        ("+919000000002", UserRole.ADMIN),
+        ("+919000000003", UserRole.SALESMAN),
+        ("+919000000005", UserRole.PRODUCTION),
+        ("+919000000006", UserRole.ACCOUNTANT),
     ]
+    tokens = {}
+    for mobile, expected_role in roles_mobiles:
+        data = otp_login(client, mobile)
+        tokens[expected_role] = data["access_token"]
+        payload = jwt.decode(data["access_token"], settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        assert payload["role"] == expected_role.value
+        assert isinstance(payload["user_id"], int)
+        assert data["expires_in"] == 900
 
-    for username, password, expected_role in credentials:
-        response = client.post(
-            "/api/v1/auth/login",
-            data={"username": username, "password": password}
-        )
-        assert response.status_code == 200, f"Failed for {username}: {response.text}"
-        data = response.json()
-        assert "access_token" in data
-        assert data["token_type"] == "bearer"
-        assert data["role"] == expected_role.value
-        assert data["username"] == username
-
-def test_invalid_login(client: TestClient):
-    response = client.post(
-        "/api/v1/auth/login",
-        data={"username": "admin", "password": "wrongpassword"}
-    )
-    assert response.status_code == 401
-    assert "Incorrect username or password" in response.json()["detail"]
-
-def test_rbac_user_roster_access(client: TestClient):
-    """
-    Verify RBAC enforcement:
-    Admin/Owner can access /api/v1/auth/users.
-    Salesman/Production/Accountant get 403 Forbidden.
-    """
-    # 1. Salesman login
-    sales_login = client.post("/api/v1/auth/login", data={"username": "salesman_a", "password": "sales123"})
-    sales_token = sales_login.json()["access_token"]
-
-    sales_res = client.get(
+    # Salesman cannot view user roster or create users
+    assert client.get("/api/v1/auth/users", headers={"Authorization": f"Bearer {tokens[UserRole.SALESMAN]}"}).status_code == 403
+    assert client.post(
         "/api/v1/auth/users",
-        headers={"Authorization": f"Bearer {sales_token}"}
-    )
-    assert sales_res.status_code == 403
-    assert "Access denied" in sales_res.json()["detail"]
+        json={"mobile": "+919876543219", "full_name": "Unauthorized Add", "role": "salesman"},
+        headers={"Authorization": f"Bearer {tokens[UserRole.SALESMAN]}"},
+    ).status_code == 403
 
-    # 2. Accountant login (read-only accountant should not see user roster)
-    acct_login = client.post("/api/v1/auth/login", data={"username": "accountant", "password": "acct123"})
-    acct_token = acct_login.json()["access_token"]
+    # Accountant cannot create orders (read-only)
+    assert client.post(
+        "/api/v1/orders",
+        json={"customer_id": 1, "items": [{"product_id": 1, "quantity_packets": 10}]},
+        headers={"Authorization": f"Bearer {tokens[UserRole.ACCOUNTANT]}"},
+    ).status_code == 403
 
-    acct_res = client.get(
+    # Admin can add, re-role, and view users
+    create_res = client.post(
         "/api/v1/auth/users",
-        headers={"Authorization": f"Bearer {acct_token}"}
+        json={"mobile": "9876543219", "full_name": "K. Selvam", "role": "salesman"},
+        headers={"Authorization": f"Bearer {tokens[UserRole.ADMIN]}"},
     )
-    assert acct_res.status_code == 403
+    assert create_res.status_code == 201
+    new_user = create_res.json()
+    assert new_user["mobile"] == "+919876543219"
 
-    # 3. Admin login -> 200 OK
-    admin_login = client.post("/api/v1/auth/login", data={"username": "admin", "password": "admin123"})
-    admin_token = admin_login.json()["access_token"]
-
-    admin_res = client.get(
-        "/api/v1/auth/users",
-        headers={"Authorization": f"Bearer {admin_token}"}
+    rerole_res = client.patch(
+        f"/api/v1/auth/users/{new_user['id']}",
+        json={"role": "production"},
+        headers={"Authorization": f"Bearer {tokens[UserRole.ADMIN]}"},
     )
-    assert admin_res.status_code == 200
-    users = admin_res.json()
-    assert len(users) >= 6
-
-def test_seed_opening_stock_ledger(db):
-    """
-    NON-NEGOTIABLE RULE 1:
-    A single append-only stock_ledger table is the source of truth.
-    Verify opening stock entries exist in stock_ledger.
-    """
-    entries = db.query(StockLedger).all()
-    assert len(entries) >= 6
-
-    # Verify flour opening stock = 100,000 g (100 kg)
-    flour = db.query(RawMaterial).filter(RawMaterial.code == "RM-FLOUR").first()
-    flour_entry = db.query(StockLedger).filter(
-        StockLedger.item_type == StockItemType.RAW_MATERIAL,
-        StockLedger.item_id == flour.id,
-        StockLedger.direction == StockDirection.IN
-    ).first()
-    assert flour_entry is not None
-    assert flour_entry.qty_base == 100000.0
-
-    # Verify finished Murukku 200g opening stock = 50 packets
-    murukku = db.query(Product).filter(Product.code == "FG-MRK-200G").first()
-    murukku_entry = db.query(StockLedger).filter(
-        StockLedger.item_type == StockItemType.FINISHED_GOODS,
-        StockLedger.item_id == murukku.id,
-        StockLedger.direction == StockDirection.IN
-    ).first()
-    assert murukku_entry is not None
-    assert murukku_entry.qty_base == 50.0
+    assert rerole_res.status_code == 200
+    assert rerole_res.json()["role"] == "production"
 
 
-def test_register_new_member(client: TestClient):
-    """
-    Verify new staff member registration and duplicate username rejection.
-    """
-    payload = {
-        "username": "k_murugan",
-        "password": "secret123password",
-        "full_name": "K. Murugan",
-        "role": "salesman",
-        "phone": "+91 98421 98765"
-    }
-    res = client.post("/api/v1/auth/register", json=payload)
-    assert res.status_code == 200
-    data = res.json()
-    assert "access_token" in data
-    assert data["username"] == "k_murugan"
-    assert data["role"] == "salesman"
+def test_refresh_rotation_and_reuse_detection(client: TestClient, db):
+    login_data = otp_login(client, "+919000000003")
+    old_cookie = client.cookies.get("refresh_token")
+    assert old_cookie is not None
 
-    # Try duplicate registration
-    res_dup = client.post("/api/v1/auth/register", json=payload)
-    assert res_dup.status_code == 400
-    assert "already registered" in res_dup.json()["detail"]
+    # First refresh succeeds and rotates cookie
+    ref1 = client.post("/api/v1/auth/refresh")
+    assert ref1.status_code == 200
+    new_cookie = client.cookies.get("refresh_token")
+    assert new_cookie is not None
+    assert new_cookie != old_cookie
+
+    # Presenting the old (already rotated) refresh token triggers reuse detection and revokes all user tokens
+    client.cookies.set("refresh_token", old_cookie)
+    reuse_res = client.post("/api/v1/auth/refresh")
+    assert reuse_res.status_code == 401
+
+    # Even the new token is now revoked for that user
+    user = db.query(User).filter(User.mobile == "+919000000003").first()
+    active_tokens = db.query(RefreshToken).filter(RefreshToken.user_id == user.id, RefreshToken.revoked_at.is_(None)).count()
+    assert active_tokens == 0
+
+    client.cookies.set("refresh_token", new_cookie)
+    after_reuse = client.post("/api/v1/auth/refresh")
+    assert after_reuse.status_code == 401
 
 
-def test_forgot_password_reset(client: TestClient):
-    """
-    Verify staff password reset and subsequent login with new password.
-    """
-    # 1. Reset password for salesman_a
-    res = client.post(
-        "/api/v1/auth/forgot-password",
-        json={"username": "salesman_a", "new_password": "brandnewpassword2026"}
+def test_deactivated_user_cannot_refresh(client: TestClient, db):
+    # Log in as salesman_b in one client session, capture refresh cookie
+    sales_login = otp_login(client, "+919000000004")
+    sales_cookie = client.cookies.get("refresh_token")
+    sales_user_id = sales_login["user"]["id"]
+
+    # Log in as admin and deactivate salesman_b
+    admin_login = otp_login(client, "+919000000002")
+    deact_res = client.patch(
+        f"/api/v1/auth/users/{sales_user_id}",
+        json={"is_active": False},
+        headers={"Authorization": f"Bearer {admin_login['access_token']}"},
     )
-    assert res.status_code == 200
-    assert "updated successfully" in res.json()["message"]
+    assert deact_res.status_code == 200
+    assert deact_res.json()["is_active"] is False
 
-    # 2. Login with old password should fail
-    old_login = client.post("/api/v1/auth/login", data={"username": "salesman_a", "password": "sales123"})
-    assert old_login.status_code == 401
+    # All refresh tokens for salesman_b must be revoked immediately
+    active_count = db.query(RefreshToken).filter(RefreshToken.user_id == sales_user_id, RefreshToken.revoked_at.is_(None)).count()
+    assert active_count == 0
 
-    # 3. Login with new password should succeed
-    new_login = client.post("/api/v1/auth/login", data={"username": "salesman_a", "password": "brandnewpassword2026"})
-    assert new_login.status_code == 200
-    assert "access_token" in new_login.json()
+    # Refresh with salesman_b's old cookie fails
+    client.cookies.set("refresh_token", sales_cookie)
+    ref_res = client.post("/api/v1/auth/refresh")
+    assert ref_res.status_code in (401, 403)
+
+
+def test_startup_refuses_production_demo_mode():
+    with pytest.raises(ValueError, match="DEMO_MODE"):
+        Settings(ENVIRONMENT="production", DEMO_MODE=True)
+
+    # Production with DEMO_MODE=False is allowed
+    prod_settings = Settings(ENVIRONMENT="production", DEMO_MODE=False)
+    assert prod_settings.ENVIRONMENT == "production"
+    assert prod_settings.DEMO_MODE is False
+
+
+def test_audit_log_auth_events(client: TestClient, db):
+    otp_login(client, "+919000000003")
+    logout_res = client.post("/api/v1/auth/logout")
+    assert logout_res.status_code == 200
+
+    actions = [
+        row.action
+        for row in db.query(AuditLog).filter(AuditLog.table_name == "auth").all()
+    ]
+    assert "otp_requested" in actions
+    assert "login_success" in actions
+    assert "logout" in actions
+
+    sample = db.query(AuditLog).filter(AuditLog.table_name == "auth", AuditLog.action == "login_success").first()
+    assert sample.new_values["mobile"].startswith("+91XXXXXX")
+    assert "ip" in sample.new_values
+    assert "user_agent" in sample.new_values
+    assert "time" in sample.new_values

@@ -15,8 +15,8 @@ def test_benchmark_step_1_purchase_flour(client, db):
     Expected: Flour balance becomes 160 kg (160,000 g).
     """
     # 1. Salesman cannot create purchases (RBAC check)
-    sales_login = client.post("/api/v1/auth/login", data={"username": "salesman_a", "password": "sales123"})
-    sales_token = sales_login.json()["access_token"]
+    from tests.conftest import otp_login
+    sales_token = otp_login(client, "+919000000003")["access_token"]
 
     supplier = db.query(Supplier).first()
     flour = db.query(RawMaterial).filter(RawMaterial.code == "RM-FLOUR").first()
@@ -43,8 +43,7 @@ def test_benchmark_step_1_purchase_flour(client, db):
     assert forbidden_res.status_code == 403
 
     # 2. Production incharge records the purchase
-    prod_login = client.post("/api/v1/auth/login", data={"username": "production", "password": "prod123"})
-    prod_token = prod_login.json()["access_token"]
+    prod_token = otp_login(client, "+919000000005")["access_token"]
 
     res = client.post(
         "/api/v1/purchases",
