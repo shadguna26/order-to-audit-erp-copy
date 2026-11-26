@@ -80,6 +80,8 @@ class InvoiceItem(Base):
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     quantity_packets = Column(Integer, nullable=False)
     unit_price_paise = Column(BigInteger, nullable=False)
+    hsn_code = Column(String(10), nullable=True)
+    gst_rate_pct = Column(Numeric(5, 2), nullable=True)
     subtotal_paise = Column(BigInteger, nullable=False)
     cgst_paise = Column(BigInteger, nullable=False, default=0)
     sgst_paise = Column(BigInteger, nullable=False, default=0)

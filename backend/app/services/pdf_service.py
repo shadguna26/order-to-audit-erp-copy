@@ -81,7 +81,7 @@ def generate_invoice_pdf(invoice: Invoice) -> bytes:
         item_rows.append([
             str(idx),
             item.product.name,
-            item.product.hsn_code,
+            item.hsn_code or item.product.hsn_code,
             str(item.quantity_packets),
             f"{item.unit_price_paise / 100:.2f}",
             f"{item.subtotal_paise / 100:.2f}",

@@ -64,6 +64,8 @@ def create_invoice_for_order(
             product_id=item.product_id,
             quantity_packets=item.quantity_packets,
             unit_price_paise=item.unit_price_paise,
+            hsn_code=item.product.hsn_code if item.product else None,
+            gst_rate_pct=item.tax_rate_pct,
             subtotal_paise=item.subtotal_paise,
             cgst_paise=item.cgst_paise,
             sgst_paise=item.sgst_paise,

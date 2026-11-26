@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, BigInteger, String, DateTime, Numeric, Enum, ForeignKey, Index
+from sqlalchemy import Column, Integer, BigInteger, String, Date, DateTime, Numeric, Enum, ForeignKey, Index
 from sqlalchemy.sql import func
 from app.database import Base
 from app.models.master import BaseUnitType
@@ -47,6 +47,7 @@ class StockLedger(Base):
     source_doc_type = Column(Enum(StockDocType), nullable=False)
     source_doc_id = Column(Integer, nullable=False)               # Foreign ID of source transaction
     batch_no = Column(String(50), nullable=True)
+    expiry_date = Column(Date, nullable=True)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 

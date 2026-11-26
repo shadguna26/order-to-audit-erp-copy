@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Numeric, Enum, Text, ForeignKey, BigInteger
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Numeric, Enum, Text, ForeignKey, BigInteger, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
@@ -21,9 +21,11 @@ class RawMaterial(Base):
     name = Column(String(100), nullable=False)                          # "Rice Flour", "Refined Sunflower Oil"
     type = Column(Enum(MaterialType), nullable=False)                   # raw or packaging
     base_unit = Column(Enum(BaseUnitType), nullable=False)              # g, ml, piece
+    unit_conversions = Column(JSON, nullable=True)                      # e.g. {"kg": 1000, "bag_25kg": 25000}
     reorder_level_base = Column(Numeric(14, 4), nullable=False, default=0)
     is_active = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
 class Product(Base):
     __tablename__ = "products"
@@ -31,12 +33,22 @@ class Product(Base):
     id = Column(Integer, primary_key=True, index=True)
     code = Column(String(30), unique=True, nullable=False, index=True)  # FG-MRK-200G
     name = Column(String(100), nullable=False)                          # "Kai Murukku 200g"
+    name_ta = Column(String(120), nullable=True)                        # Optional Tamil name
+    voice_aliases = Column(Text, nullable=True)                         # Comma-separated voice aliases
+    category = Column(String(60), nullable=True, default="Snacks")
     hsn_code = Column(String(10), nullable=False, default="21069099")   # Indian GST HSN for savory snacks
     gst_rate_pct = Column(Numeric(5, 2), nullable=False, default=5.00)  # 5% GST
     pack_size_g = Column(Numeric(10, 2), nullable=False, default=200.00)
+    pack_size_value = Column(Numeric(10, 2), nullable=False, default=200.00)
+    pack_size_unit = Column(String(10), nullable=False, default="g")
+    packets_per_carton = Column(Integer, nullable=False, default=20)
+    selling_price_paise = Column(BigInteger, nullable=False, default=5000)
+    shelf_life_days = Column(Integer, nullable=True, default=90)
+    reorder_level_packets = Column(Integer, nullable=False, default=0)
     base_unit = Column(Enum(BaseUnitType), nullable=False, default=BaseUnitType.PIECE)
     is_active = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     boms = relationship("BOM", back_populates="product")
 
@@ -89,6 +101,7 @@ class PriceList(Base):
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     customer_type = Column(String(30), nullable=False)                  # 'retailer', 'distributor'
     price_paise = Column(BigInteger, nullable=False)                    # In paise (e.g. 5000 = Rs 50)
+    effective_from = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     product = relationship("Product")

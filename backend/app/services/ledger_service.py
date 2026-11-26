@@ -1,3 +1,4 @@
+from datetime import date
 from decimal import Decimal
 from typing import Optional, List, Dict, Any
 from sqlalchemy.orm import Session
@@ -25,7 +26,8 @@ def record_stock_movement(
     source_doc_type: StockDocType,
     source_doc_id: int,
     created_by: int,
-    batch_no: Optional[str] = None
+    batch_no: Optional[str] = None,
+    expiry_date: Optional[date] = None
 ) -> StockLedger:
     """
     NON-NEGOTIABLE RULE 1:
@@ -49,6 +51,7 @@ def record_stock_movement(
         source_doc_type=source_doc_type,
         source_doc_id=source_doc_id,
         batch_no=batch_no,
+        expiry_date=expiry_date,
         created_by=created_by
     )
     db.add(entry)

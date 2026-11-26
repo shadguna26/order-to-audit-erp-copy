@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import math
 from typing import Dict, Any, List
 from sqlalchemy.orm import Session
@@ -86,15 +87,22 @@ def create_customer_order(
         if not product:
             raise ValueError(f"Product {p_id} not found")
 
-        # Resolve price from price_list or item override
-        price_entry = db.query(PriceList).filter(
-            PriceList.product_id == p_id,
-            PriceList.customer_type == customer.customer_type
-        ).first()
+        # Resolve effective-dated price from price_list or product default
+        now_utc = datetime.now(timezone.utc)
+        price_entry = (
+            db.query(PriceList)
+            .filter(
+                PriceList.product_id == p_id,
+                PriceList.customer_type == customer.customer_type,
+                PriceList.effective_from <= now_utc,
+            )
+            .order_by(PriceList.effective_from.desc(), PriceList.id.desc())
+            .first()
+        )
 
         unit_price = item_data.get("unit_price_paise")
         if unit_price is None:
-            unit_price = price_entry.price_paise if price_entry else 5000 # default Rs 50
+            unit_price = price_entry.price_paise if price_entry else (product.selling_price_paise or 5000)
 
         subtotal_paise = qty_pkts * unit_price
         gst = calculate_gst_breakdown(

@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field
 from typing import List, Optional
 from datetime import datetime
+from decimal import Decimal
 from app.models.billing import InvoiceStatus
 
 class InvoiceItemResponse(BaseModel):
@@ -8,6 +9,8 @@ class InvoiceItemResponse(BaseModel):
     product_id: int
     quantity_packets: int
     unit_price_paise: int
+    hsn_code: Optional[str] = None
+    gst_rate_pct: Optional[Decimal] = None
     subtotal_paise: int
     cgst_paise: int
     sgst_paise: int

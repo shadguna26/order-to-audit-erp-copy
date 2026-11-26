@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 from decimal import Decimal
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, date
 from app.models.stock import StockItemType, StockLocationType, StockDirection, StockDocType
 from app.models.master import BaseUnitType
 
@@ -17,6 +17,7 @@ class StockMovementResponse(BaseModel):
     source_doc_type: StockDocType
     source_doc_id: int
     batch_no: Optional[str] = None
+    expiry_date: Optional[date] = None
     created_by: int
     created_at: datetime
 
