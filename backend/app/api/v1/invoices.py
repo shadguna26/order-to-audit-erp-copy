@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.api.deps import get_current_user, require_roles
 from app.models.auth import User, UserRole
-from app.models.billing import Invoice
+from app.models.billing import Invoice, CreditNote
 from app.schemas.billing import (
     InvoiceResponse,
     CreditNoteCreate,
@@ -17,7 +17,7 @@ from app.services.billing_service import (
     cancel_invoice_with_credit_note,
     generate_whatsapp_share_url
 )
-from app.services.pdf_service import generate_invoice_pdf
+from app.services.pdf_service import generate_invoice_pdf, generate_credit_note_pdf
 
 router = APIRouter(prefix="/invoices", tags=["Invoicing & Billing"])
 
@@ -83,7 +83,29 @@ def download_invoice_pdf(
         content=pdf_bytes,
         media_type="application/pdf",
         headers={
-            "Content-Disposition": f'attachment; filename="Invoice_{clean_no}.pdf"',
+            "Content-Disposition": f'attachment; filename="{clean_no}.pdf"',
+            "Cache-Control": "no-store",
+        }
+    )
+
+@router.get("/credit-notes/{credit_note_id}/pdf")
+def download_credit_note_pdf(
+    credit_note_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.OWNER, UserRole.ACCOUNTANT]))
+):
+    """Returns GST Credit Note PDF."""
+    cn = db.query(CreditNote).filter(CreditNote.id == credit_note_id).first()
+    if not cn:
+        raise HTTPException(status_code=404, detail="Credit note not found")
+    invoice = db.query(Invoice).filter(Invoice.id == cn.invoice_id).first()
+    pdf_bytes = generate_credit_note_pdf(cn, invoice)
+    clean_no = re.sub(r'[/\\:*?"<>|]', '-', cn.credit_note_no)
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{clean_no}.pdf"',
             "Cache-Control": "no-store",
         }
     )

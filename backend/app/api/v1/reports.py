@@ -37,7 +37,14 @@ def sales_register(
             for d in data
         ]
         csv_data = generate_csv_string(headers, rows)
-        return Response(content=csv_data, media_type="text/csv", headers={"Content-Disposition": "attachment; filename=Sales_Register.csv"})
+        return Response(
+            content=csv_data,
+            media_type="text/csv",
+            headers={
+                "Content-Disposition": 'attachment; filename="Sales_Register.csv"',
+                "Cache-Control": "no-store",
+            },
+        )
 
     elif format == "excel":
         rows = [
@@ -45,7 +52,14 @@ def sales_register(
             for d in data
         ]
         excel_bytes = generate_excel_bytes("Sales Register", headers, rows)
-        return Response(content=excel_bytes, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": "attachment; filename=Sales_Register.xlsx"})
+        return Response(
+            content=excel_bytes,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={
+                "Content-Disposition": 'attachment; filename="Sales_Register.xlsx"',
+                "Cache-Control": "no-store",
+            },
+        )
 
     return data
 
@@ -78,7 +92,14 @@ def purchase_register(
             for d in data
         ]
         csv_data = generate_csv_string(headers, rows)
-        return Response(content=csv_data, media_type="text/csv", headers={"Content-Disposition": "attachment; filename=Purchase_Register.csv"})
+        return Response(
+            content=csv_data,
+            media_type="text/csv",
+            headers={
+                "Content-Disposition": 'attachment; filename="Purchase_Register.csv"',
+                "Cache-Control": "no-store",
+            },
+        )
 
     elif format == "excel":
         rows = [
@@ -86,7 +107,14 @@ def purchase_register(
             for d in data
         ]
         excel_bytes = generate_excel_bytes("Purchase Register", headers, rows)
-        return Response(content=excel_bytes, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": "attachment; filename=Purchase_Register.xlsx"})
+        return Response(
+            content=excel_bytes,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={
+                "Content-Disposition": 'attachment; filename="Purchase_Register.xlsx"',
+                "Cache-Control": "no-store",
+            },
+        )
 
     return data
 
@@ -108,7 +136,14 @@ def ageing_report(
             for d in data
         ]
         csv_data = generate_csv_string(headers, rows)
-        return Response(content=csv_data, media_type="text/csv", headers={"Content-Disposition": "attachment; filename=Outstanding_Ageing.csv"})
+        return Response(
+            content=csv_data,
+            media_type="text/csv",
+            headers={
+                "Content-Disposition": 'attachment; filename="Outstanding_Ageing.csv"',
+                "Cache-Control": "no-store",
+            },
+        )
 
     elif format == "excel":
         rows = [
@@ -116,7 +151,14 @@ def ageing_report(
             for d in data
         ]
         excel_bytes = generate_excel_bytes("Ageing Report", headers, rows)
-        return Response(content=excel_bytes, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": "attachment; filename=Outstanding_Ageing.xlsx"})
+        return Response(
+            content=excel_bytes,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={
+                "Content-Disposition": 'attachment; filename="Outstanding_Ageing.xlsx"',
+                "Cache-Control": "no-store",
+            },
+        )
 
     return data
 
@@ -137,7 +179,14 @@ def production_report(
             for d in data
         ]
         csv_data = generate_csv_string(headers, rows)
-        return Response(content=csv_data, media_type="text/csv", headers={"Content-Disposition": "attachment; filename=Production_Report.csv"})
+        return Response(
+            content=csv_data,
+            media_type="text/csv",
+            headers={
+                "Content-Disposition": 'attachment; filename="Production_Report.csv"',
+                "Cache-Control": "no-store",
+            },
+        )
 
     elif format == "excel":
         rows = [
@@ -145,6 +194,13 @@ def production_report(
             for d in data
         ]
         excel_bytes = generate_excel_bytes("Production Report", headers, rows)
-        return Response(content=excel_bytes, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": "attachment; filename=Production_Report.xlsx"})
+        return Response(
+            content=excel_bytes,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={
+                "Content-Disposition": 'attachment; filename="Production_Report.xlsx"',
+                "Cache-Control": "no-store",
+            },
+        )
 
     return data

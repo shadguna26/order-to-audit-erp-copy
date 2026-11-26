@@ -133,3 +133,59 @@ def generate_invoice_pdf(invoice: Invoice) -> bytes:
     pdf_bytes = buffer.getvalue()
     buffer.close()
     return pdf_bytes
+
+
+def generate_credit_note_pdf(credit_note, invoice) -> bytes:
+    """Generates a GST Credit Note PDF in memory."""
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=36,
+        leftMargin=36,
+        topMargin=36,
+        bottomMargin=36
+    )
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CNTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        leading=20,
+        textColor=colors.HexColor("#B45309")
+    )
+    normal_style = styles['Normal']
+    normal_style.fontSize = 9
+    normal_style.leading = 12
+
+    elements = []
+    company_info = f"""
+    <b>{settings.COMPANY_NAME}</b><br/>
+    {settings.COMPANY_ADDRESS}<br/>
+    Phone: {settings.COMPANY_PHONE} | Email: {settings.COMPANY_EMAIL}<br/>
+    <b>GSTIN: {settings.COMPANY_GSTIN} | State: {settings.COMPANY_STATE} (Code: {settings.COMPANY_STATE_CODE})</b>
+    """
+    elements.append(Paragraph(company_info, normal_style))
+    elements.append(Spacer(1, 10))
+    elements.append(Paragraph("<b>CREDIT NOTE</b>", title_style))
+    elements.append(Spacer(1, 8))
+
+    inv_no = invoice.invoice_no if invoice else f"#{credit_note.invoice_id}"
+    rows = [
+        ["Credit Note No:", credit_note.credit_note_no, "Against Invoice:", inv_no],
+        ["Date:", credit_note.created_at.strftime("%d-%m-%Y"), "Amount (Rs):", f"{credit_note.total_paise / 100:.2f}"],
+        ["Reason:", credit_note.reason, "", ""],
+    ]
+    tbl = Table(rows, colWidths=[100, 170, 100, 170])
+    tbl.setStyle(TableStyle([
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('FONTNAME', (2, 0), (2, -1), 'Helvetica-Bold'),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#E7E5E4")),
+        ('PADDING', (0, 0), (-1, -1), 6),
+    ]))
+    elements.append(tbl)
+    doc.build(elements)
+    pdf_bytes = buffer.getvalue()
+    buffer.close()
+    return pdf_bytes

@@ -113,3 +113,37 @@ def test_invoice_pdf_filename_no_slash(client, db):
     filename_part = cd.split("filename=")[-1].strip('"').strip("'")
     assert "/" not in filename_part, f"Filename must not contain /: {filename_part!r}"
     assert "\\" not in filename_part, f"Filename must not contain backslash: {filename_part!r}"
+    assert filename_part.endswith(".pdf") and "-" in filename_part
+
+
+def test_credit_note_pdf_and_report_export_headers(client, db):
+    """Credit note PDF and report exports return attachment disposition and Cache-Control no-store."""
+    admin_token = otp_login(client, "+919000000002")["access_token"]
+    inv_id = _create_invoice(client, admin_token)
+
+    cn_res = client.post(
+        "/api/v1/invoices/cancel",
+        json={"invoice_id": inv_id, "reason": "Damaged goods"},
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert cn_res.status_code == 200, cn_res.text
+    cn_id = cn_res.json()["id"]
+
+    pdf_res = client.get(
+        f"/api/v1/invoices/credit-notes/{cn_id}/pdf",
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert pdf_res.status_code == 200, pdf_res.text
+    assert pdf_res.headers["content-type"] == "application/pdf"
+    assert pdf_res.content[:4] == b"%PDF"
+    assert "attachment" in pdf_res.headers.get("content-disposition", "")
+    assert "/" not in pdf_res.headers.get("content-disposition", "")
+    assert "no-store" in pdf_res.headers.get("cache-control", "").lower()
+
+    csv_res = client.get(
+        "/api/v1/reports/sales-register?format=csv",
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert csv_res.status_code == 200
+    assert "attachment" in csv_res.headers.get("content-disposition", "")
+    assert "no-store" in csv_res.headers.get("cache-control", "").lower()
