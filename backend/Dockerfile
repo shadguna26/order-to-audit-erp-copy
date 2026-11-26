@@ -6,6 +6,11 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
+    libpango1.0-0 \
+    libharfbuzz0b \
+    libffi-dev \
+    fonts-noto \
+    fonts-noto-core \
     fonts-noto-cjk \
     curl \
     && rm -rf /var/lib/apt/lists/*

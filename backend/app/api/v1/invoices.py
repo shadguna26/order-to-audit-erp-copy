@@ -1,3 +1,4 @@
+import re
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
@@ -77,11 +78,14 @@ def download_invoice_pdf(
         raise HTTPException(status_code=404, detail="Invoice not found")
 
     pdf_bytes = generate_invoice_pdf(invoice)
-    clean_no = invoice.invoice_no.replace("/", "_")
+    clean_no = re.sub(r'[/\\:*?"<>|]', '-', invoice.invoice_no)
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"inline; filename=Invoice_{clean_no}.pdf"}
+        headers={
+            "Content-Disposition": f'attachment; filename="Invoice_{clean_no}.pdf"',
+            "Cache-Control": "no-store",
+        }
     )
 
 @router.post("/cancel", response_model=CreditNoteResponse)
