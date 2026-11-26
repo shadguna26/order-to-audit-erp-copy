@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, BigInteger, String, DateTime, Numeric, Boolean, ForeignKey, Text
+from sqlalchemy import Column, Integer, BigInteger, String, DateTime, Numeric, Boolean, ForeignKey, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
@@ -12,7 +12,8 @@ class ProductionRun(Base):
     __tablename__ = "production_runs"
 
     id = Column(Integer, primary_key=True, index=True)
-    run_no = Column(String(50), unique=True, nullable=False, index=True) # PR/2026-27/0001
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False, index=True, default=1)
+    run_no = Column(String(50), nullable=False, index=True) # PR/2026-27/0001
     bom_id = Column(Integer, ForeignKey("bom.id"), nullable=False)
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     planned_batches = Column(Integer, nullable=False, default=1)
@@ -27,6 +28,10 @@ class ProductionRun(Base):
     cost_per_packet_paise = Column(BigInteger, nullable=False, default=0)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("business_id", "run_no", name="uq_production_runs_biz_no"),
+    )
 
     bom = relationship("BOM")
     product = relationship("Product")
@@ -55,6 +60,7 @@ class ProductionOverhead(Base):
     __tablename__ = "production_overheads"
 
     id = Column(Integer, primary_key=True, index=True)
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False, index=True, default=1)
     production_run_id = Column(Integer, ForeignKey("production_runs.id", ondelete="CASCADE"), nullable=False)
     overhead_type = Column(String(50), nullable=False)                 # 'labour', 'gas_power', 'other'
     amount_paise = Column(BigInteger, nullable=False)                  # In paise (e.g. 120000 = Rs 1,200)

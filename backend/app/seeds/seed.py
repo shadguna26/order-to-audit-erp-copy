@@ -3,6 +3,7 @@ import sys
 from decimal import Decimal
 from sqlalchemy.orm import Session
 from app.database import SessionLocal, engine, Base
+from app.models.business import Business, BusinessType
 from app.models.auth import User, UserRole
 from app.models.master import (
     MaterialType,
@@ -28,6 +29,27 @@ def seed_database(db: Session):
     # Ensure tables exist on the current database bind
     bind_engine = db.get_bind()
     Base.metadata.create_all(bind=bind_engine)
+
+    # 0. BUSINESS #1 (Sri Lakshmi Snacks)
+    biz = db.query(Business).filter(Business.id == 1).first()
+    if not biz:
+        biz = Business(
+            id=1,
+            name="Sri Lakshmi Snacks",
+            business_type=BusinessType.MANUFACTURER,
+            gstin="33AAAAA0000A1Z5",
+            state="Tamil Nadu",
+            state_code="33",
+            address="Plot 42, SIDCO Industrial Estate, Thuvakudi, Tiruchirappalli",
+            pincode="620015",
+            phone="+91-431-2501234",
+            email="accounts@srilakshmisnacks.in",
+            invoice_prefix="TN",
+            variance_tolerance_pct=Decimal("3.00"),
+            is_active=True,
+        )
+        db.add(biz)
+        db.flush()
 
     # 1. USERS & ROLES (Mobile + OTP, one dummy user per role + second salesman for benchmark)
     # Non-negotiable: salesman, admin, production, accountant (read-only), owner

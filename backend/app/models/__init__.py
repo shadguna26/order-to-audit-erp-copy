@@ -1,4 +1,5 @@
 # Import all models here so Alembic and Base.metadata see them together
+from app.models.business import Business, BusinessType, DocumentSequence
 from app.models.auth import User, UserRole, OTPRequest, RefreshToken
 from app.models.master import (
     MaterialType,
@@ -42,6 +43,9 @@ from app.models.billing import (
 from app.models.audit import AuditLog
 
 __all__ = [
+    "Business",
+    "BusinessType",
+    "DocumentSequence",
     "User",
     "UserRole",
     "MaterialType",

@@ -37,6 +37,7 @@ class StockLedger(Base):
     __tablename__ = "stock_ledger"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False, index=True, default=1)
     item_type = Column(Enum(StockItemType), nullable=False)
     item_id = Column(Integer, nullable=False)                      # raw_materials.id or products.id
     location_type = Column(Enum(StockLocationType), nullable=False)

@@ -12,6 +12,7 @@ class AuditLog(Base):
     __tablename__ = "audit_log"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False, index=True, default=1)
     table_name = Column(String(50), nullable=False, index=True)
     record_id = Column(Integer, nullable=False, index=True)
     action = Column(String(30), nullable=False) # INSERT, UPDATE, CANCEL, otp_requested, login_success, etc.

@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, BigInteger, String, DateTime, Enum, ForeignKey, Text, Date, Numeric
+from sqlalchemy import Column, Integer, BigInteger, String, DateTime, Enum, ForeignKey, Text, Date, Numeric, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
@@ -12,7 +12,8 @@ class Purchase(Base):
     __tablename__ = "purchases"
 
     id = Column(Integer, primary_key=True, index=True)
-    purchase_no = Column(String(50), unique=True, nullable=False, index=True) # PO/2026-27/0001
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False, index=True, default=1)
+    purchase_no = Column(String(50), nullable=False, index=True) # PO/2026-27/0001
     supplier_id = Column(Integer, ForeignKey("suppliers.id"), nullable=False)
     supplier_invoice_no = Column(String(50), nullable=True)
     invoice_date = Column(Date, nullable=False)
@@ -20,6 +21,10 @@ class Purchase(Base):
     status = Column(Enum(PurchaseStatus), nullable=False, default=PurchaseStatus.RECEIVED)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("business_id", "purchase_no", name="uq_purchases_biz_no"),
+    )
 
     supplier = relationship("Supplier")
     creator = relationship("User")
@@ -54,7 +59,8 @@ class Invoice(Base):
     __tablename__ = "invoices"
 
     id = Column(Integer, primary_key=True, index=True)
-    invoice_no = Column(String(50), unique=True, nullable=False, index=True) # TN/2026-27/0001
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False, index=True, default=1)
+    invoice_no = Column(String(50), nullable=False, index=True) # TN/2026-27/0001
     order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
     status = Column(Enum(InvoiceStatus), nullable=False, default=InvoiceStatus.POSTED)
@@ -66,6 +72,10 @@ class Invoice(Base):
     pdf_path = Column(String(255), nullable=True)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("business_id", "invoice_no", name="uq_invoices_biz_no"),
+    )
 
     order = relationship("Order")
     customer = relationship("Customer")
@@ -95,12 +105,17 @@ class CreditNote(Base):
     __tablename__ = "credit_notes"
 
     id = Column(Integer, primary_key=True, index=True)
-    credit_note_no = Column(String(50), unique=True, nullable=False, index=True) # CN/2026-27/0001
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False, index=True, default=1)
+    credit_note_no = Column(String(50), nullable=False, index=True) # CN/2026-27/0001
     invoice_id = Column(Integer, ForeignKey("invoices.id"), nullable=False)
     reason = Column(Text, nullable=False)
     total_paise = Column(BigInteger, nullable=False)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("business_id", "credit_note_no", name="uq_credit_notes_biz_no"),
+    )
 
     invoice = relationship("Invoice")
     creator = relationship("User")
@@ -109,7 +124,8 @@ class Payment(Base):
     __tablename__ = "payments"
 
     id = Column(Integer, primary_key=True, index=True)
-    payment_no = Column(String(50), unique=True, nullable=False, index=True) # REC/2026-27/0001
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False, index=True, default=1)
+    payment_no = Column(String(50), nullable=False, index=True) # REC/2026-27/0001
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
     amount_paise = Column(BigInteger, nullable=False)                         # e.g. 400000 = Rs 4,000
     payment_mode = Column(String(30), nullable=False, default="cash")        # cash, upi, neft_rtgs, cheque
@@ -117,6 +133,10 @@ class Payment(Base):
     notes = Column(Text, nullable=True)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("business_id", "payment_no", name="uq_payments_biz_no"),
+    )
 
     customer = relationship("Customer")
     creator = relationship("User")

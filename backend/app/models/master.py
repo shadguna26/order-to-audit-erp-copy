@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Numeric, Enum, Text, ForeignKey, BigInteger, JSON
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Numeric, Enum, Text, ForeignKey, BigInteger, JSON, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
@@ -17,7 +17,8 @@ class RawMaterial(Base):
     __tablename__ = "raw_materials"
 
     id = Column(Integer, primary_key=True, index=True)
-    code = Column(String(30), unique=True, nullable=False, index=True)  # RM-FLOUR, PKG-POUCH-200G
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False, index=True, default=1)
+    code = Column(String(30), nullable=False, index=True)  # RM-FLOUR, PKG-POUCH-200G
     name = Column(String(100), nullable=False)                          # "Rice Flour", "Refined Sunflower Oil"
     type = Column(Enum(MaterialType), nullable=False)                   # raw or packaging
     base_unit = Column(Enum(BaseUnitType), nullable=False)              # g, ml, piece
@@ -27,11 +28,16 @@ class RawMaterial(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
+    __table_args__ = (
+        UniqueConstraint("business_id", "code", name="uq_raw_materials_biz_code"),
+    )
+
 class Product(Base):
     __tablename__ = "products"
 
     id = Column(Integer, primary_key=True, index=True)
-    code = Column(String(30), unique=True, nullable=False, index=True)  # FG-MRK-200G
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False, index=True, default=1)
+    code = Column(String(30), nullable=False, index=True)  # FG-MRK-200G
     name = Column(String(100), nullable=False)                          # "Kai Murukku 200g"
     name_ta = Column(String(120), nullable=True)                        # Optional Tamil name
     voice_aliases = Column(Text, nullable=True)                         # Comma-separated voice aliases
@@ -50,12 +56,17 @@ class Product(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
+    __table_args__ = (
+        UniqueConstraint("business_id", "code", name="uq_products_biz_code"),
+    )
+
     boms = relationship("BOM", back_populates="product")
 
 class BOM(Base):
     __tablename__ = "bom"
 
     id = Column(Integer, primary_key=True, index=True)
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False, index=True, default=1)
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     name = Column(String(100), nullable=False)                          # e.g. "Standard Batch (200 pkts)"
     batch_size_packets = Column(Integer, nullable=False, default=200)
@@ -83,13 +94,16 @@ class Customer(Base):
     __tablename__ = "customers"
 
     id = Column(Integer, primary_key=True, index=True)
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False, index=True, default=1)
     name = Column(String(120), nullable=False)                          # e.g. "Sri Murugan Stores"
     gstin = Column(String(15), nullable=True)                           # 33AAAAA1111A1Z1
     state = Column(String(50), nullable=False, default="Tamil Nadu")
     state_code = Column(String(2), nullable=False, default="33")        # TN is 33
+    area = Column(String(100), nullable=True)
     address = Column(Text, nullable=False)
     phone = Column(String(20), nullable=False)
     customer_type = Column(String(30), nullable=False, default="retailer") # retailer, distributor
+    status = Column(String(20), nullable=False, default="active")       # active, pending, rejected
     credit_limit_paise = Column(BigInteger, nullable=False, default=0)
     is_active = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
@@ -98,6 +112,7 @@ class PriceList(Base):
     __tablename__ = "price_list"
 
     id = Column(Integer, primary_key=True, index=True)
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False, index=True, default=1)
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     customer_type = Column(String(30), nullable=False)                  # 'retailer', 'distributor'
     price_paise = Column(BigInteger, nullable=False)                    # In paise (e.g. 5000 = Rs 50)
@@ -110,6 +125,7 @@ class Supplier(Base):
     __tablename__ = "suppliers"
 
     id = Column(Integer, primary_key=True, index=True)
+    business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False, index=True, default=1)
     name = Column(String(120), nullable=False)
     gstin = Column(String(15), nullable=True)
     state = Column(String(50), nullable=False, default="Tamil Nadu")
