@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sun, Moon, LogOut, Building2, Sparkles } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import { useTheme } from './context/ThemeContext';
@@ -10,7 +10,7 @@ import { ProductionScreen } from './pages/ProductionScreen';
 import { AccountantScreen } from './pages/AccountantScreen';
 import { OwnerScreen } from './pages/OwnerScreen';
 import { StockLedgerModal } from './components/StockLedgerModal';
-import { initGridFx } from './effects/gridFx';
+import { initBackdrop } from './effects/cursorSparks';
 
 type TabKey = 'salesman' | 'admin' | 'production' | 'accountant' | 'owner';
 
@@ -35,29 +35,18 @@ export const App: React.FC = () => {
     itemId: 1
   });
 
-  const fxCanvasRef = useRef<HTMLCanvasElement>(null);
-  const gridFxRef = useRef<any>(null);
-
-  // Mount Grid FX once at app root
+  // Mount 24px Background Grid and Cursor Sparks once at app root
   useEffect(() => {
-    if (fxCanvasRef.current) {
-      gridFxRef.current = initGridFx(fxCanvasRef.current, {
-        isEnabled: () => animationsAndGuides && !prefersReducedMotion
-      });
-    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cleanup: any = initBackdrop({ cell: 24 });
     return () => {
-      if (gridFxRef.current) {
-        gridFxRef.current.destroy();
+      if (typeof cleanup === 'function') {
+        cleanup();
+      } else if (cleanup && typeof cleanup.destroy === 'function') {
+        cleanup.destroy();
       }
     };
-  }, [animationsAndGuides, prefersReducedMotion]);
-
-  // Update theme colors when day/night mode toggles
-  useEffect(() => {
-    if (gridFxRef.current) {
-      gridFxRef.current.updateTheme();
-    }
-  }, [theme]);
+  }, []);
 
   // Set active username for per-user preferences and set default tab based on user role
   useEffect(() => {
@@ -103,11 +92,8 @@ export const App: React.FC = () => {
 
   return (
     <>
-      {/* 1. Fixed #fx-canvas mounted once in app root behind all content */}
-      <canvas id="fx-canvas" ref={fxCanvasRef} />
-
-      {/* 2. Content wrapper with position: relative and z-index: 1 */}
-      <div className="app-content-wrapper min-h-screen flex flex-col bg-page text-soil transition-colors font-body">
+      {/* Content wrapper - transparent so canvas grid shows through */}
+      <div className="app-content-wrapper min-h-screen flex flex-col text-soil transition-colors font-body">
         {!user || !token ? (
           <Login />
         ) : (

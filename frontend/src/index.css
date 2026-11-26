@@ -4,12 +4,24 @@
 
 :root {
   /* Day Mode Theme Tokens */
-  --bg-page: #FAF3E3;
-  --bg-card: #FFFBF0;
+  --bg: #ffffff;
+  --surface: #FFFBF0;
+  --grid-line: rgba(43, 29, 16, 0.14);
+  --fx-1: #D9A21B;
+  /* turmeric */
+  --fx-2: #B5532A;
+  /* terracotta */
+  --fx-3: #3F6B2F;
+  /* leaf green */
+  --fx-4: #E07A5F;
+  /* warm coral */
+
+  --bg-page: var(--bg);
+  --bg-card: var(--surface);
   --bg-card-subtle: #F5EEDB;
   --text-main: #2B1D10;
   --text-muted: #6B5543;
-  --border-card: #E5D7BF;
+  --border-card: #f3f8f8;
 
   --accent-terracotta: #B5532A;
   --accent-terracotta-hover: #96421F;
@@ -19,18 +31,24 @@
   --warning-turmeric-hover: #B88714;
   --danger-chilli: #B3261E;
   --danger-chilli-hover: #911D17;
-
-  --grid-size: 32px;
-  --grid-line-color: rgba(43, 29, 16, 0.07);
-  --twinkle: #D9A21B;       /* turmeric in day mode */
-  --twinkle-2: #B5532A;     /* terracotta */
-  --twinkle-3: #3F6B2F;     /* leaf green */
 }
 
 .dark {
   /* Night Mode Theme Tokens */
-  --bg-page: #1A140D;
-  --bg-card: #241C13;
+  --bg: #1A140D;
+  --surface: #241C13;
+  --grid-line: rgba(234, 223, 200, 0.14);
+  --fx-1: #F2C14D;
+  /* soft gold */
+  --fx-2: #E5865C;
+  /* warm terracotta */
+  --fx-3: #6BA853;
+  /* light leaf green */
+  --fx-4: #F4A261;
+  /* glowing amber */
+
+  --bg-page: var(--bg);
+  --bg-card: var(--surface);
   --bg-card-subtle: #2D2319;
   --text-main: #EADFC8;
   --text-muted: #A89882;
@@ -44,61 +62,55 @@
   --warning-turmeric-hover: #F2C14D;
   --danger-chilli: #D9443B;
   --danger-chilli-hover: #E85B53;
-
-  --grid-size: 32px;
-  --grid-line-color: rgba(234, 223, 200, 0.06);
-  --twinkle: #F2C14D;       /* soft gold twinkle in night mode */
-  --twinkle-2: #E5865C;     /* warm terracotta */
-  --twinkle-3: #6BA853;     /* lighter leaf green */
 }
 
+html,
 body {
   margin: 0;
-  background-color: var(--bg-page);
+  padding: 0;
+  background-color: var(--bg);
   color: var(--text-main);
   font-family: 'Inter', 'Mukta', 'Noto Sans Tamil', system-ui, sans-serif;
   font-size: 16px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  background-image:
-    linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-  background-attachment: fixed;
+  min-height: 100vh;
 }
 
-/* App content sits above fixed fx-canvas */
-.app-content-wrapper {
-  position: relative;
-  z-index: 1;
+#root {
+  background: transparent !important;
 }
 
-/* Fixed Grid FX Canvas mounted once at app root */
-#fx-canvas {
+/* Canvases sit fixed behind all page content */
+#bg-grid,
+#bg-sparks {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
   pointer-events: none;
+  display: block;
+}
+
+#bg-grid {
   z-index: 0;
 }
 
-/* Faint 32px graph-paper background grid with radial fade mask */
-.graph-paper-grid {
-  background-color: var(--bg-page);
-  background-image:
-    linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
-  background-size: 32px 32px;
-  background-attachment: fixed;
-  mask-image: radial-gradient(ellipse at 50% 30%, rgba(0, 0, 0, 1) 35%, rgba(0, 0, 0, 0.25) 85%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse at 50% 30%, rgba(0, 0, 0, 1) 35%, rgba(0, 0, 0, 0.25) 85%, transparent 100%);
+#bg-sparks {
+  z-index: 1;
 }
 
-/* Solid card surfaces: tables, forms, and numbers sit on solid card surfaces with no grid or texture behind them */
+/* App content sits above canvases at z-index 2 with transparent wrapper */
+.app-content-wrapper {
+  position: relative;
+  z-index: 2;
+  background: transparent !important;
+}
+
+/* Solid card surfaces: tables, forms, and numbers sit on solid card surfaces with no grid behind them */
 .solid-card {
-  background-color: var(--bg-card);
+  background-color: var(--surface);
   border: 1px solid var(--border-card);
   box-shadow: 0 1px 2px 0 rgba(43, 29, 16, 0.04);
 }
