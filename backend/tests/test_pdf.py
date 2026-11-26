@@ -86,12 +86,7 @@ def test_invoice_pdf_forbidden_salesman(client, db):
         f"/api/v1/invoices/{inv_id}/pdf",
         headers={"Authorization": f"Bearer {sales_token}"},
     )
-    # Salesman is authenticated but only admin/owner should download PDFs.
-    # The endpoint currently uses get_current_user (any authenticated user).
-    # We restrict it here: if the endpoint returns 200 for salesman this test
-    # documents the CURRENT behaviour so we can decide whether to tighten it.
-    # TODO: tighten to 403 once role restriction is added to the PDF endpoint.
-    assert res.status_code in (200, 403), f"Unexpected status: {res.status_code}"
+    assert res.status_code == 403, f"Expected 403 for salesman, got {res.status_code}"
 
 
 def test_invoice_pdf_unauthenticated(client, db):

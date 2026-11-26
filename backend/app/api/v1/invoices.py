@@ -70,7 +70,7 @@ def get_invoice(
 def download_invoice_pdf(
     invoice_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_roles([UserRole.ADMIN, UserRole.OWNER, UserRole.ACCOUNTANT]))
 ):
     """Returns commercial GST Tax Invoice PDF."""
     invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
